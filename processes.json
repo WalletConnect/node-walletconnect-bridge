@@ -8,6 +8,7 @@
       "out_file": "logs/bridge.stdout.log",
       "pid_file": "pids/bridge.pid",
       "env": {
+        "PORT": 5001,
         "NODE_ENV": "production"
       }
     }
