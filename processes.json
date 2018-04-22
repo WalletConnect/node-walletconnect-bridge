@@ -1,0 +1,15 @@
+{
+  "apps": [
+    {
+      "name": "WalletConnect bridge",
+      "script": "build/index.js",
+      "max_restarts": 5,
+      "error_file": "logs/bridge.stderr.log",
+      "out_file": "logs/bridge.stdout.log",
+      "pid_file": "pids/bridge.pid",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}

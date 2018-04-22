@@ -1,0 +1,19 @@
+# dependencies
+node_modules
+
+# logs
+npm-debug.log
+
+# Backpack build
+build
+
+# config files
+*.env
+
+.DS_Store
+*.log
+logs
+pids
+
+# redis
+dump.rdb
