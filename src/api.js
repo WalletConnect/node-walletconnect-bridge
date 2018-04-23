@@ -54,7 +54,7 @@ router.get('/hello', async(req, res) => {
   return res.send({
     message: 'Hello world, this is Wallet Connect v1',
     baseURL: 'https://walletconnect.matic.network',
-    webhook: '/notification/new'
+    webhook: 'https://walletconnect.matic.network/notification/new'
   })
 })
 
