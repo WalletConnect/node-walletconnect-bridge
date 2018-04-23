@@ -21,5 +21,9 @@ export default {
   redis: {
     url: process.env.REDIS_URL || 'redis://localhost:6379/0',
     prefix: process.env.REDIS_PREFIX || 'wc-bridge'
+  },
+  fcm: {
+    url: process.env.FCM_URL || 'https://fcm.googleapis.com/fcm/send',
+    apiKey: process.env.FCM_API_KEY || ''
   }
 }

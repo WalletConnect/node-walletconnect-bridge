@@ -2,7 +2,23 @@ import {Router} from 'express'
 import uuidv4 from 'uuid/v4'
 import axios from 'axios'
 
+import config from './config'
 import * as keystore from './keystore'
+
+// notification axios
+const notificationAxios = axios.create({
+  baseURL: config.fcm.url,
+  timeout: 3000,
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `key=${config.fcm.apiKey}`
+  }
+})
+
+// get message body for given dapp name
+function getMessageBody(dappName) {
+  return `New request from ${dappName}`
+}
 
 //
 // Send webhook
@@ -20,6 +36,7 @@ function sendWebHook(details, sessionId, transactionId, dappName) {
   return axios({
     url: walletWebhook,
     method: 'post',
+    timeout: 3000,
     headers: {'Content-Type': 'application/json'},
     data: payload
   })
@@ -192,6 +209,51 @@ transactionStatusRouter.get('/', async(req, res) => {
 })
 
 //
+// Notification
+//
+
+const notificationRouter = Router({mergeParams: true})
+notificationRouter.post('/new', async(req, res) => {
+  const {fcmToken, sessionId, transactionId, dappName} = req.body
+  if (!fcmToken || !sessionId || !transactionId || !dappName) {
+    return res.status(412).json({
+      message: 'fcmToken, sessionId and transactionId required'
+    })
+  }
+
+  // fcm payload
+  const fcmPayload = {
+    to: fcmToken,
+    data: {sessionId, transactionId, dappName},
+    notification: {
+      body: getMessageBody(dappName)
+    }
+  }
+
+  try {
+    const response = await notificationAxios.post('', fcmPayload)
+    // check status
+    if (
+      response.status === 200 &&
+      response.data &&
+      response.data.success === 1
+    ) {
+      return res.json({
+        success: true
+      })
+    }
+  } catch (e) {
+    return req.status(400).json({
+      message: 'Error while sending notification'
+    })
+  }
+
+  return req.status(400).json({
+    message: 'FCM server error, push notification failed'
+  })
+})
+
+//
 // Main router
 //
 
@@ -206,6 +268,9 @@ router.use(
   '/session/:sessionId/transaction/:transactionId/status',
   transactionStatusRouter
 )
+
+// add notification router
+router.use('/notification', notificationRouter)
 
 // main router
 export default router
