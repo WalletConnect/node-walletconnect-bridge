@@ -1,7 +1,33 @@
 import {Router} from 'express'
 import uuidv4 from 'uuid/v4'
+import axios from 'axios'
 
 import * as keystore from './keystore'
+
+//
+// Send webhook
+//
+
+function sendWebHook(details, sessionId, transactionId, dappName) {
+  const {fcmToken, walletWebhook} = details
+  const payload = {
+    sessionId,
+    transactionId,
+    fcmToken,
+    dappName
+  }
+
+  return axios({
+    url: walletWebhook,
+    method: 'post',
+    headers: {'Content-Type': 'application/json'},
+    data: payload
+  })
+}
+
+//
+// Router
+//
 
 // create router
 const router = Router()
@@ -93,6 +119,11 @@ transactionRouter.post('/new', async(req, res) => {
       60 * 60 /* in seconds */
     )
 
+    // notify wallet app using fcm
+    const sessionDetails = await keystore.getSessionDetails(session_id)
+    await sendWebHook(sessionDetails, sessionId, transactionId, data.dappName)
+
+    // return transaction id
     return res.status(201).json({
       transactionId
     })
