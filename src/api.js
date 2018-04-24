@@ -52,7 +52,7 @@ const router = Router()
 // Add hello route
 router.get('/hello', async(req, res) => {
   return res.send({
-    message: 'Hello world, this is Wallet Connect v1',
+    message: 'Hello world, this is Wallet Connect',
     baseURL: 'https://walletconnect.matic.network',
     webhook: 'https://walletconnect.matic.network/notification/new'
   })
@@ -84,18 +84,43 @@ sessionRouter.post('/new', async(req, res) => {
   }
 })
 
-sessionRouter.put('/:sessionId', async(req, res) => {
-  const {fcmToken, walletWebhook, data} = req.body
-  const sessionId = req.params.sessionId
+sessionRouter.get('/:sessionId', async(req, res) => {
   try {
-    await keystore.setSessionDetails(sessionId, {
+    const {sessionId} = req.params
+    const data = await keystore.getSessionRequest(sessionId)
+    if (data) {
+      return res.json(data)
+    }
+  } catch (e) {
+    return res.status(404).json({
+      message: 'Session not found.'
+    })
+  }
+
+  // no content
+  return res.status(204).end()
+})
+
+//
+// Session status router
+//
+
+const sessionStatusRouter = Router({mergeParams: true})
+
+// create new session status
+sessionStatusRouter.post('/new', async(req, res) => {
+  const {fcmToken, walletWebhook, data} = req.body
+  const {sessionId} = req.params
+  try {
+    await keystore.setSessionData(sessionId, {
       fcmToken,
       walletWebhook
     })
-    await keystore.setSessionData(sessionId, data)
+    await keystore.setSessionStatus(sessionId, data)
 
     return res.json({
-      success: true
+      success: true,
+      sessionId: sessionId
     })
   } catch (e) {
     return res.status(400).json({
@@ -104,9 +129,10 @@ sessionRouter.put('/:sessionId', async(req, res) => {
   }
 })
 
-sessionRouter.get('/:sessionId', async(req, res) => {
+sessionStatusRouter.get('/', async(req, res) => {
   try {
-    const data = await keystore.getSessionData(req.params.sessionId)
+    const {sessionId} = req.params
+    const data = await keystore.getSessionStatus(req.params.sessionId)
     if (data) {
       return res.json(data)
     }
@@ -262,6 +288,9 @@ notificationRouter.post('/new', async(req, res) => {
 
 // add session router to main Router
 router.use('/session', sessionRouter)
+
+// add session router to main Router
+router.use('/session/:sessionId/status', sessionStatusRouter)
 
 // add transaction router to main Router
 router.use('/session/:sessionId/transaction', transactionRouter)
