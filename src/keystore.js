@@ -40,11 +40,11 @@ export function getSessionRequest(sessionId) {
 }
 
 export function getSessionDetails(sessionId) {
-  return getHashValue(getSessionKey(sessionId), 'details')
+  return getHashValue(getSessionKey(sessionId), 'details') // unencrypted data
 }
 
 export function getSessionData(sessionId) {
-  return getHashValue(getSessionKey(sessionId), 'data')
+  return getHashValue(getSessionKey(sessionId), 'data') // encrypted data
 }
 
 export function setSessionRequest(sessionId, data) {
@@ -67,20 +67,12 @@ export function getTxRequest(sessionId, transactionId) {
   return getHashValue(getTransactionKey(sessionId, transactionId), 'req')
 }
 
-export function getTxData(sessionId, transactionId) {
-  return getHashValue(getTransactionKey(sessionId, transactionId), 'data')
-}
-
 export function getTxStatus(sessionId, transactionId) {
   return getHashValue(getTransactionKey(sessionId, transactionId), 'status')
 }
 
 export function setTxRequest(sessionId, transactionId, data) {
   return setHashValue(getTransactionKey(sessionId, transactionId), 'req', data)
-}
-
-export function setTxData(sessionId, transactionId, data) {
-  return setHashValue(getTransactionKey(sessionId, transactionId), 'data', data)
 }
 
 export function setTxStatus(sessionId, transactionId, data) {

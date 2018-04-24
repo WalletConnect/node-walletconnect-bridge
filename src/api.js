@@ -68,7 +68,7 @@ const sessionRouter = Router()
 sessionRouter.post('/new', async(req, res) => {
   const sessionId = uuidv4()
   try {
-    await keystore.setSessionRequest(sessionId)
+    await keystore.setSessionRequest(sessionId, req.body)
     await keystore.setTTL(
       keystore.getSessionKey(sessionId),
       60 * 60 /* in seconds */
@@ -153,20 +153,21 @@ transactionRouter.post('/new', async(req, res) => {
   }
 })
 
-transactionRouter.put('/:transactionId', async(req, res) => {
-  const {sessionId, transactionId} = req.params
-  const data = req.body
-
+transactionRouter.get('/:transactionId', async(req, res) => {
   try {
-    await keystore.setTxData(sessionId, transactionId, data)
-    return res.json({
-      success: true
-    })
+    const {sessionId, transactionId} = req.params
+    const data = await keystore.getTxRequest(sessionId, transactionId)
+    if (data) {
+      return res.json(data)
+    }
   } catch (e) {
-    return res.status(400).json({
-      message: 'Error while writing to db'
+    return res.status(404).json({
+      message: 'Session not found.'
     })
   }
+
+  // no content
+  return res.status(204).end()
 })
 
 //
