@@ -39,24 +39,24 @@ export function getSessionRequest(sessionId) {
   return getHashValue(getSessionKey(sessionId), 'req')
 }
 
-export function getSessionData(sessionId) {
-  return getHashValue(getSessionKey(sessionId), 'data') // unencrypted data
+export function getSessionDetails(sessionId) {
+  return getHashValue(getSessionKey(sessionId), 'details') // unencrypted data
 }
 
-export function getSessionStatus(sessionId) {
-  return getHashValue(getSessionKey(sessionId), 'status') // encrypted data
+export function getSessionData(sessionId) {
+  return getHashValue(getSessionKey(sessionId), 'data') // encrypted data
 }
 
 export function setSessionRequest(sessionId, data) {
   return setHashValue(getSessionKey(sessionId), 'req', data)
 }
 
-export function setSessionData(sessionId, data) {
-  return setHashValue(getSessionKey(sessionId), 'data', data)
+export function setSessionDetails(sessionId, data) {
+  return setHashValue(getSessionKey(sessionId), 'details', data)
 }
 
-export function setSessionStatus(sessionId, data) {
-  return setHashValue(getSessionKey(sessionId), 'status', data)
+export function setSessionData(sessionId, data) {
+  return setHashValue(getSessionKey(sessionId), 'data', data)
 }
 
 //

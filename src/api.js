@@ -84,39 +84,18 @@ sessionRouter.post('/new', async(req, res) => {
   }
 })
 
-sessionRouter.get('/:sessionId', async(req, res) => {
-  try {
-    const {sessionId} = req.params
-    const data = await keystore.getSessionRequest(sessionId)
-    if (data) {
-      return res.json(data)
-    }
-  } catch (e) {
-    return res.status(404).json({
-      message: 'Session not found.'
-    })
-  }
-
-  // no content
-  return res.status(204).end()
-})
-
-//
-// Session status router
-//
-
-const sessionStatusRouter = Router({mergeParams: true})
-
-// create new session status
-sessionStatusRouter.post('/new', async(req, res) => {
+sessionRouter.put('/:sessionId', async(req, res) => {
   const {fcmToken, walletWebhook, data} = req.body
   const {sessionId} = req.params
   try {
-    await keystore.setSessionData(sessionId, {
+    // unencrypted details
+    await keystore.setSessionDetails(sessionId, {
       fcmToken,
       walletWebhook
     })
-    await keystore.setSessionStatus(sessionId, data)
+
+    // encrypted data
+    await keystore.setSessionData(sessionId, data)
 
     return res.json({
       success: true,
@@ -129,16 +108,18 @@ sessionStatusRouter.post('/new', async(req, res) => {
   }
 })
 
-sessionStatusRouter.get('/', async(req, res) => {
+sessionRouter.get('/:sessionId', async(req, res) => {
   try {
     const {sessionId} = req.params
-    const data = await keystore.getSessionStatus(req.params.sessionId)
+    const data = await keystore.getSessionData(sessionId)
     if (data) {
-      return res.json(data)
+      return res.json({
+        data
+      })
     }
   } catch (e) {
-    return res.status(404).json({
-      message: 'Session not found.'
+    return res.status(400).json({
+      message: 'Error while getting session data'
     })
   }
 
@@ -156,7 +137,7 @@ const transactionRouter = Router({mergeParams: true})
 transactionRouter.post('/new', async(req, res) => {
   const transactionId = uuidv4()
   const {sessionId} = req.params
-  const data = req.body
+  const {data, dappName} = req.body
   try {
     await keystore.setTxRequest(sessionId, transactionId, data)
     await keystore.setTTL(
@@ -165,8 +146,8 @@ transactionRouter.post('/new', async(req, res) => {
     )
 
     // notify wallet app using fcm
-    const sessionDetails = await keystore.getSessionDetails(session_id)
-    await sendWebHook(sessionDetails, sessionId, transactionId, data.dappName)
+    const sessionDetails = await keystore.getSessionDetails(sessionId)
+    await sendWebHook(sessionDetails, sessionId, transactionId, dappName)
 
     // return transaction id
     return res.status(201).json({
@@ -184,7 +165,9 @@ transactionRouter.get('/:transactionId', async(req, res) => {
     const {sessionId, transactionId} = req.params
     const data = await keystore.getTxRequest(sessionId, transactionId)
     if (data) {
-      return res.json(data)
+      return res.json({
+        data
+      })
     }
   } catch (e) {
     return res.status(404).json({
@@ -205,7 +188,7 @@ const transactionStatusRouter = Router({mergeParams: true})
 // create new transaction status
 transactionStatusRouter.post('/new', async(req, res) => {
   const {sessionId, transactionId} = req.params
-  const data = req.body
+  const {data} = req.body
   try {
     await keystore.setTxStatus(sessionId, transactionId, data)
 
@@ -223,9 +206,11 @@ transactionStatusRouter.post('/new', async(req, res) => {
 transactionStatusRouter.get('/', async(req, res) => {
   const {sessionId, transactionId} = req.params
   try {
-    const result = await keystore.getTxStatus(sessionId, transactionId)
-    if (result) {
-      return res.json(result)
+    const data = await keystore.getTxStatus(sessionId, transactionId)
+    if (data) {
+      return res.json({
+        data
+      })
     }
   } catch (e) {
     return res.status(400).json({
@@ -246,7 +231,7 @@ notificationRouter.post('/new', async(req, res) => {
   const {fcmToken, sessionId, transactionId, dappName} = req.body
   if (!fcmToken || !sessionId || !transactionId || !dappName) {
     return res.status(412).json({
-      message: 'fcmToken, sessionId and transactionId required'
+      message: 'fcmToken, sessionId, transactionId and dappName required'
     })
   }
 
@@ -272,12 +257,12 @@ notificationRouter.post('/new', async(req, res) => {
       })
     }
   } catch (e) {
-    return req.status(400).json({
+    return res.status(400).json({
       message: 'Error while sending notification'
     })
   }
 
-  return req.status(400).json({
+  return res.status(400).json({
     message: 'FCM server error, push notification failed'
   })
 })
@@ -288,9 +273,6 @@ notificationRouter.post('/new', async(req, res) => {
 
 // add session router to main Router
 router.use('/session', sessionRouter)
-
-// add session router to main Router
-router.use('/session/:sessionId/status', sessionStatusRouter)
 
 // add transaction router to main Router
 router.use('/session/:sessionId/transaction', transactionRouter)
