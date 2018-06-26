@@ -5,7 +5,7 @@ Bridge server for [walletconnect](https://walletconnect.org) standard.
 ### Setup
 
 ```bash
-$ git clone git@github.com:maticnetwork/walletconnect-bridge.git
+$ git clone git@github.com:walletconnect/node-walletconnect-bridge.git
 $ cd walletconnect-bridge
 $ npm install
 
