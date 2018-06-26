@@ -1,6 +1,6 @@
 # WalletConnect bridge
 
-Bridge server for [walletconnect](https://walletconnect.org) protocol.
+Bridge server for [walletconnect](https://walletconnect.org) standard.
 
 ### Setup
 
