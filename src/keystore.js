@@ -19,6 +19,10 @@ export function setTTL(key, n) {
   return redisClient.expireAsync(key, n)
 }
 
+export function getTTL(key) {
+  return redisClient.ttlAsync(key)
+}
+
 export function getHashValue(key, field) {
   return redisClient.hgetAsync(key, field).then(data => {
     if (data) {
@@ -57,6 +61,10 @@ export function setSessionDetails(sessionId, data) {
 
 export function setSessionData(sessionId, data) {
   return setHashValue(getSessionKey(sessionId), 'data', data)
+}
+
+export function getSessionExpiry(sessionId) {
+  return getTTL(getSessionKey(sessionId))
 }
 
 //

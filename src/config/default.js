@@ -8,7 +8,7 @@ const fileName =
     ? '/config-production.env'
     : '/config.env'
 const configFile = `${root}${fileName}`
-dotenv.config({path: configFile, silent: true})
+dotenv.config({ path: configFile, silent: true })
 
 export default {
   env: process.env.NODE_ENV || 'development',
@@ -25,5 +25,11 @@ export default {
   fcm: {
     url: process.env.FCM_URL || 'https://fcm.googleapis.com/fcm/send',
     apiKey: process.env.FCM_API_KEY || ''
+  },
+  walletconnect: {
+    sessionExpiration: parseInt(
+      process.env.WALLETCONNECT_SESSION_EXPIRATION || 24 * 60 * 60,
+      10
+    ) // 24 hours
   }
 }
