@@ -151,7 +151,7 @@ transactionRouter.post('/new', async(req, res) => {
 
     // notify wallet app using fcm
     const sessionDetails = await keystore.getSessionDetails(sessionId)
-    // await sendWebHook(sessionDetails, sessionId, transactionId, dappName)
+    await sendWebHook(sessionDetails, sessionId, transactionId, dappName)
 
     // return transaction id
     return res.status(201).json({
