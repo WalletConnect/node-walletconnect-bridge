@@ -41,11 +41,7 @@ const router = Router()
 
 // Add hello route
 router.get('/hello', async(req, res) => {
-  return res.send({
-    message: 'Hello world, this is WalletConnect',
-    baseURL: 'https://bridge.walletconnect.org',
-    pushEndpoint: 'https://push.walletconnect.org/notification/new'
-  })
+  return res.send('Hello World, this is WalletConnect')
 })
 
 //
