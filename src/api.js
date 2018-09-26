@@ -13,12 +13,12 @@ function sendPushNotification(
   fcmToken,
   pushEndpoint,
   sessionId,
-  transactionId,
+  callId,
   dappName
 ) {
   const payload = {
     sessionId,
-    transactionId,
+    callId,
     fcmToken,
     dappName
   }
@@ -116,22 +116,22 @@ sessionRouter.get('/:sessionId', async(req, res) => {
 })
 
 //
-// Transaction router
+// Call router
 //
 
-const transactionRouter = Router({ mergeParams: true })
+const callRouter = Router({ mergeParams: true })
 
-// create new transaction
-transactionRouter.post('/new', async(req, res) => {
-  const transactionId = uuidv4()
+// create new call
+callRouter.post('/new', async(req, res) => {
+  const callId = uuidv4()
   const { sessionId } = req.params
   const { data, dappName = 'Unknown DApp' } = req.body
   try {
-    const txData = { encryptionPayload: data, timestamp: Date.now() }
-    await keystore.setTxRequest(transactionId, txData)
+    const callData = { encryptionPayload: data, timestamp: Date.now() }
+    await keystore.setCallRequest(callId, callData)
     await keystore.setTTL(
-      keystore.getTransactionKey(transactionId),
-      config.walletconnect.txExpiration
+      keystore.getCallKey(callId),
+      config.walletconnect.callExpiration
     )
 
     // notify wallet app using push notification
@@ -142,13 +142,13 @@ transactionRouter.post('/new', async(req, res) => {
       fcmToken,
       pushEndpoint,
       sessionId,
-      transactionId,
+      callId,
       dappName
     )
 
-    // return transaction id
+    // return call id
     return res.status(201).json({
-      transactionId
+      callId
     })
   } catch (e) {
     let errorMessage
@@ -162,10 +162,10 @@ transactionRouter.post('/new', async(req, res) => {
   }
 })
 
-transactionRouter.get('/:transactionId', async(req, res) => {
+callRouter.get('/:callId', async(req, res) => {
   try {
-    const { transactionId } = req.params
-    const data = await keystore.getTxRequest(transactionId)
+    const { callId } = req.params
+    const data = await keystore.getCallRequest(callId)
     if (data) {
       return res.json({
         data
@@ -182,21 +182,21 @@ transactionRouter.get('/:transactionId', async(req, res) => {
 })
 
 //
-// Transaction status router
+// Call status router
 //
 
-const transactionStatusRouter = Router({ mergeParams: true })
+const callStatusRouter = Router({ mergeParams: true })
 
-// create new transaction status
-transactionStatusRouter.post('/new', async(req, res) => {
-  const { transactionId } = req.params
+// create new call status
+callStatusRouter.post('/new', async(req, res) => {
+  const { callId } = req.params
   const { data } = req.body
   try {
-    await keystore.setTxStatus(transactionId, data)
+    await keystore.setCallStatus(callId, data)
 
     return res.status(201).json({
       success: true,
-      transactionId: transactionId
+      callId: callId
     })
   } catch (e) {
     return res.status(400).json({
@@ -205,10 +205,10 @@ transactionStatusRouter.post('/new', async(req, res) => {
   }
 })
 
-transactionStatusRouter.get('/', async(req, res) => {
-  const { transactionId } = req.params
+callStatusRouter.get('/', async(req, res) => {
+  const { callId } = req.params
   try {
-    const data = await keystore.getTxStatus(transactionId)
+    const data = await keystore.getCallStatus(callId)
     if (data) {
       return res.json({
         data
@@ -231,11 +231,11 @@ transactionStatusRouter.get('/', async(req, res) => {
 // add session router to main Router
 router.use('/session', sessionRouter)
 
-// add transaction router to main Router
-router.use('/session/:sessionId/transaction', transactionRouter)
+// add call router to main Router
+router.use('/session/:sessionId/call', callRouter)
 
-// add transaction status router to main Router
-router.use('/transaction-status/:transactionId', transactionStatusRouter)
+// add call status router to main Router
+router.use('/call-status/:callId', callStatusRouter)
 
 // main router
 export default router

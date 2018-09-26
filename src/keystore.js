@@ -11,8 +11,8 @@ export function getSessionKey(sessionId) {
   return `session:${sessionId}`
 }
 
-export function getTransactionKey(transactionId) {
-  return `tx:${transactionId}`
+export function getCallKey(callId) {
+  return `call:${callId}`
 }
 
 export function setTTL(key, n) {
@@ -68,21 +68,21 @@ export function getSessionExpiry(sessionId) {
 }
 
 //
-// tx related getters and setters
+// call related getters and setters
 //
 
-export function getTxRequest(transactionId) {
-  return getHashValue(getTransactionKey(transactionId), 'req')
+export function getCallRequest(callId) {
+  return getHashValue(getCallKey(callId), 'req')
 }
 
-export function getTxStatus(transactionId) {
-  return getHashValue(getTransactionKey(transactionId), 'status')
+export function getCallStatus(callId) {
+  return getHashValue(getCallKey(callId), 'status')
 }
 
-export function setTxRequest(transactionId, data) {
-  return setHashValue(getTransactionKey(transactionId), 'req', data)
+export function setCallRequest(callId, data) {
+  return setHashValue(getCallKey(callId), 'req', data)
 }
 
-export function setTxStatus(transactionId, data) {
-  return setHashValue(getTransactionKey(transactionId), 'status', data)
+export function setCallStatus(callId, data) {
+  return setHashValue(getCallKey(callId), 'status', data)
 }
