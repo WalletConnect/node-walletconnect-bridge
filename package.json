@@ -1,8 +1,8 @@
 {
-  "name": "walletconnect-bridge",
-  "version": "1.0.0",
+  "name": "node-walletconnect-bridge",
+  "version": "0.6.0",
   "description": "Bridge server for walletconnect standard",
-  "main": "index.js",
+  "main": "dist/js-walletconnect-core.js",
   "private": true,
   "scripts": {
     "clean": "rm -rf build",
@@ -12,7 +12,23 @@
     "lint": "eslint src/",
     "dev": "babel-node src/index.js"
   },
-  "author": "Jaynti Kanani <jdkanani@matic.network>",
+  "author": "WalletConnect <walletconnect.org>",
+  "homepage": "https://walletconnect.org",
+  "license": "LGPL-3.0",
+  "directories": {
+    "lib": "dist",
+    "test": "test"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/walletconnect/node-walletconnect-bridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/walletconnect/node-walletconnect-bridge/issues"
+  },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
@@ -35,7 +51,6 @@
     "dotenv": "^5.0.1",
     "express": "^4.16.3",
     "express-list-endpoints": "^3.0.1",
-    "moment": "^2.22.2",
     "redis": "^2.8.0",
     "uuid": "^3.2.1"
   }

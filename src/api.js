@@ -1,17 +1,21 @@
 import { Router } from 'express'
 import uuidv4 from 'uuid/v4'
 import axios from 'axios'
-import moment from 'moment'
 
 import config from './config'
 import * as keystore from './keystore'
 
 //
-// Send webhook
+// Send push notification
 //
 
-function sendWebHook(details, sessionId, transactionId, dappName) {
-  const { fcmToken, pushEndpoint } = details
+function sendPushNotification(
+  fcmToken,
+  pushEndpoint,
+  sessionId,
+  transactionId,
+  dappName
+) {
   const payload = {
     sessionId,
     transactionId,
@@ -21,7 +25,7 @@ function sendWebHook(details, sessionId, transactionId, dappName) {
 
   return axios({
     url: pushEndpoint,
-    method: 'post',
+    method: 'POST',
     timeout: 3000,
     headers: { 'Content-Type': 'application/json' },
     data: payload
@@ -127,16 +131,24 @@ transactionRouter.post('/new', async(req, res) => {
   const { sessionId } = req.params
   const { data, dappName = 'Unknown DApp' } = req.body
   try {
-    const txData = { encryptionPayload: data, timestamp: moment.utc().unix() }
+    const txData = { encryptionPayload: data, timestamp: Date.now() }
     await keystore.setTxRequest(transactionId, txData)
     await keystore.setTTL(
       keystore.getTransactionKey(transactionId),
       config.walletconnect.txExpiration
     )
 
-    // notify wallet app using webhook
-    const sessionDetails = await keystore.getSessionDetails(sessionId)
-    await sendWebHook(sessionDetails, sessionId, transactionId, dappName)
+    // notify wallet app using push notification
+    const { fcmToken, pushEndpoint } = await keystore.getSessionDetails(
+      sessionId
+    )
+    await sendPushNotification(
+      fcmToken,
+      pushEndpoint,
+      sessionId,
+      transactionId,
+      dappName
+    )
 
     // return transaction id
     return res.status(201).json({
