@@ -1,6 +1,6 @@
 {
   "name": "node-walletconnect-bridge",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Bridge server for walletconnect standard",
   "main": "dist/js-walletconnect-core.js",
   "private": true,
