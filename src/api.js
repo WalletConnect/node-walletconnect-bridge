@@ -6,21 +6,6 @@ import moment from 'moment'
 import config from './config'
 import * as keystore from './keystore'
 
-// notification axios
-const notificationAxios = axios.create({
-  baseURL: config.fcm.url,
-  timeout: 3000,
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `key=${config.fcm.apiKey}`
-  }
-})
-
-// get message body for given dapp name
-function getMessageBody(dappName) {
-  return `New request from ${dappName}`
-}
-
 //
 // Send webhook
 //
@@ -55,7 +40,7 @@ router.get('/hello', async(req, res) => {
   return res.send({
     message: 'Hello world, this is WalletConnect',
     baseURL: 'https://bridge.walletconnect.org',
-    webhook: 'https://bridge.walletconnect.org/notification/new'
+    pushEndpoint: 'https://push.walletconnect.org/notification/new'
   })
 })
 
@@ -149,7 +134,7 @@ transactionRouter.post('/new', async(req, res) => {
       config.walletconnect.txExpiration
     )
 
-    // notify wallet app using fcm
+    // notify wallet app using webhook
     const sessionDetails = await keystore.getSessionDetails(sessionId)
     await sendWebHook(sessionDetails, sessionId, transactionId, dappName)
 
@@ -232,51 +217,6 @@ transactionStatusRouter.get('/', async(req, res) => {
 })
 
 //
-// Notification
-//
-
-const notificationRouter = Router({ mergeParams: true })
-notificationRouter.post('/new', async(req, res) => {
-  const { fcmToken, sessionId, transactionId, dappName } = req.body
-  if (!fcmToken || !sessionId || !transactionId || !dappName) {
-    return res.status(412).json({
-      message: 'fcmToken, sessionId, transactionId and dappName required'
-    })
-  }
-
-  // fcm payload
-  const fcmPayload = {
-    to: fcmToken,
-    data: { sessionId, transactionId, dappName },
-    notification: {
-      body: getMessageBody(dappName)
-    }
-  }
-
-  try {
-    const response = await notificationAxios.post('', fcmPayload)
-    // check status
-    if (
-      response.status === 200 &&
-      response.data &&
-      response.data.success === 1
-    ) {
-      return res.json({
-        success: true
-      })
-    }
-  } catch (e) {
-    return res.status(400).json({
-      message: 'Error while sending notification'
-    })
-  }
-
-  return res.status(400).json({
-    message: 'FCM server error, push notification failed'
-  })
-})
-
-//
 // Main router
 //
 
@@ -288,9 +228,6 @@ router.use('/session/:sessionId/transaction', transactionRouter)
 
 // add transaction status router to main Router
 router.use('/transaction-status/:transactionId', transactionStatusRouter)
-
-// add notification router
-router.use('/notification', notificationRouter)
 
 // main router
 export default router
