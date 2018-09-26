@@ -143,9 +143,9 @@ transactionRouter.post('/new', async(req, res) => {
   const { data, dappName = 'Unknown DApp' } = req.body
   try {
     const txData = { encryptionPayload: data, timestamp: moment.utc().unix() }
-    await keystore.setTxRequest(sessionId, transactionId, txData)
+    await keystore.setTxRequest(transactionId, txData)
     await keystore.setTTL(
-      keystore.getTransactionKey(sessionId, transactionId),
+      keystore.getTransactionKey(transactionId),
       config.walletconnect.txExpiration
     )
 
@@ -171,8 +171,8 @@ transactionRouter.post('/new', async(req, res) => {
 
 transactionRouter.get('/:transactionId', async(req, res) => {
   try {
-    const { sessionId, transactionId } = req.params
-    const data = await keystore.getTxRequest(sessionId, transactionId)
+    const { transactionId } = req.params
+    const data = await keystore.getTxRequest(transactionId)
     if (data) {
       return res.json({
         data
@@ -196,10 +196,10 @@ const transactionStatusRouter = Router({ mergeParams: true })
 
 // create new transaction status
 transactionStatusRouter.post('/new', async(req, res) => {
-  const { sessionId, transactionId } = req.params
+  const { transactionId } = req.params
   const { data } = req.body
   try {
-    await keystore.setTxStatus(sessionId, transactionId, data)
+    await keystore.setTxStatus(transactionId, data)
 
     return res.status(201).json({
       success: true,
@@ -213,9 +213,9 @@ transactionStatusRouter.post('/new', async(req, res) => {
 })
 
 transactionStatusRouter.get('/', async(req, res) => {
-  const { sessionId, transactionId } = req.params
+  const { transactionId } = req.params
   try {
-    const data = await keystore.getTxStatus(sessionId, transactionId)
+    const data = await keystore.getTxStatus(transactionId)
     if (data) {
       return res.json({
         data
@@ -287,10 +287,7 @@ router.use('/session', sessionRouter)
 router.use('/session/:sessionId/transaction', transactionRouter)
 
 // add transaction status router to main Router
-router.use(
-  '/session/:sessionId/transaction/:transactionId/status',
-  transactionStatusRouter
-)
+router.use('/transaction-status/:transactionId/status', transactionStatusRouter)
 
 // add notification router
 router.use('/notification', notificationRouter)
