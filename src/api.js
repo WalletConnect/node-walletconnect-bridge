@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import uuidv4 from 'uuid/v4'
 import axios from 'axios'
+import moment from 'moment'
 
 import config from './config'
 import * as keystore from './keystore'
@@ -25,7 +26,7 @@ function getMessageBody(dappName) {
 //
 
 function sendWebHook(details, sessionId, transactionId, dappName) {
-  const { fcmToken, walletWebhook } = details
+  const { fcmToken, pushEndpoint } = details
   const payload = {
     sessionId,
     transactionId,
@@ -34,7 +35,7 @@ function sendWebHook(details, sessionId, transactionId, dappName) {
   }
 
   return axios({
-    url: walletWebhook,
+    url: pushEndpoint,
     method: 'post',
     timeout: 3000,
     headers: { 'Content-Type': 'application/json' },
@@ -139,12 +140,13 @@ const transactionRouter = Router({ mergeParams: true })
 transactionRouter.post('/new', async(req, res) => {
   const transactionId = uuidv4()
   const { sessionId } = req.params
-  const { data, dappName } = req.body
+  const { data, dappName = 'Unknown DApp' } = req.body
   try {
-    await keystore.setTxRequest(sessionId, transactionId, data)
+    const txData = { encryptionPayload: data, timestamp: moment.utc().unix() }
+    await keystore.setTxRequest(sessionId, transactionId, txData)
     await keystore.setTTL(
       keystore.getTransactionKey(sessionId, transactionId),
-      60 * 60 /* in seconds */
+      config.walletconnect.txExpiration
     )
 
     // notify wallet app using fcm
@@ -156,8 +158,13 @@ transactionRouter.post('/new', async(req, res) => {
       transactionId
     })
   } catch (e) {
+    let errorMessage
+    if (e && e.response && e.response.data && e.response.data.message) {
+      errorMessage =
+        e && e.response && e.response.data && e.response.data.message
+    }
     return res.status(400).json({
-      message: 'Error while writing to db'
+      message: errorMessage || 'Error while writing to db'
     })
   }
 })

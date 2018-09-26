@@ -28,8 +28,12 @@ export default {
   },
   walletconnect: {
     sessionExpiration: parseInt(
-      process.env.WALLETCONNECT_SESSION_EXPIRATION || 24 * 60 * 60,
+      process.env.WALLETCONNECT_SESSION_EXPIRATION || 24 * 60 * 60, // 24 hours
       10
-    ) // 24 hours
+    ),
+    txExpiration: parseInt(
+      process.env.WALLETCONNECT_TX_EXPIRATION || 60 * 60, // 24 hours
+      10
+    )
   }
 }
