@@ -3,6 +3,6 @@ export function now() {
 }
 
 export function getExpirationTime(ttlInSeconds) {
-  const expires = Math.floor(Number(now() + ttlInSeconds) * 1000)
+  const expires = Math.trunc(Number(now() + ttlInSeconds) * 1000)
   return expires
 }
