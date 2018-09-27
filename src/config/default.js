@@ -27,7 +27,7 @@ export default {
       process.env.WALLETCONNECT_SESSION_EXPIRATION || 24 * 60 * 60, // 24 hours
       10
     ),
-    txExpiration: parseInt(
+    callExpiration: parseInt(
       process.env.WALLETCONNECT_TX_EXPIRATION || 60 * 60, // 24 hours
       10
     )
