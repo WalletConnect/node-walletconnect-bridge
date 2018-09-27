@@ -192,7 +192,7 @@ transactionStatusRouter.post('/new', async(req, res) => {
   const { transactionId } = req.params
   const { data } = req.body
   try {
-    await keystore.setTxStatus(transactionId, data)
+    await keystore.setTxStatus(transactionId, { encryptionPayload: data })
 
     return res.status(201).json({
       success: true,
