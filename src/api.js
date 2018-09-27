@@ -192,7 +192,7 @@ callStatusRouter.post('/new', async(req, res) => {
   const { callId } = req.params
   const { data } = req.body
   try {
-    await keystore.setCallStatus(callId, data)
+    await keystore.setCallStatus(callId, { encryptionPayload: data })
 
     return res.status(201).json({
       success: true,
