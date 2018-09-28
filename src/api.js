@@ -4,6 +4,7 @@ import axios from 'axios'
 
 import config from './config'
 import * as keystore from './keystore'
+import { getExpirationTime } from './time'
 
 //
 // Send push notification
@@ -83,10 +84,14 @@ sessionRouter.put('/:sessionId', async(req, res) => {
     // encrypted data
     await keystore.setSessionData(sessionId, data)
 
+    const ttlInSeconds = config.walletconnect.sessionExpiration
+
+    const expires = getExpirationTime(ttlInSeconds)
+
     return res.json({
       success: true,
       sessionId: sessionId,
-      expiresInSeconds: config.walletconnect.sessionExpiration
+      expires
     })
   } catch (e) {
     return res.status(400).json({
@@ -99,10 +104,13 @@ sessionRouter.get('/:sessionId', async(req, res) => {
   try {
     const { sessionId } = req.params
     const data = await keystore.getSessionData(sessionId)
-    const expiresInSeconds = await keystore.getSessionExpiry(sessionId)
+
+    const ttlInSeconds = await keystore.getSessionExpiry(sessionId)
+    const expires = getExpirationTime(ttlInSeconds)
+
     if (data) {
       return res.json({
-        data: { encryptionPayload: data, expiresInSeconds: expiresInSeconds }
+        data: { encryptionPayload: data, expires }
       })
     }
   } catch (e) {
