@@ -10,22 +10,17 @@ import { getExpirationTime } from './time'
 // Send push notification
 //
 
-function sendPushNotification(
-  fcmToken,
-  pushEndpoint,
-  sessionId,
-  callId,
-  dappName
-) {
+function sendPushNotification(pushData, sessionId, callId, dappName) {
   const payload = {
     sessionId,
     callId,
-    fcmToken,
+    pushType: pushData.type,
+    pushToken: pushData.token,
     dappName
   }
 
   return axios({
-    url: pushEndpoint,
+    url: pushData.endpoint,
     method: 'POST',
     timeout: 3000,
     headers: { 'Content-Type': 'application/json' },
@@ -103,14 +98,14 @@ sessionRouter.put('/:sessionId', async(req, res) => {
 sessionRouter.get('/:sessionId', async(req, res) => {
   try {
     const { sessionId } = req.params
-    const data = await keystore.getSessionData(sessionId)
+    const encryptionPayload = await keystore.getSessionData(sessionId)
 
     const ttlInSeconds = await keystore.getSessionExpiry(sessionId)
     const expires = getExpirationTime(ttlInSeconds)
 
-    if (data) {
+    if (encryptionPayload) {
       return res.json({
-        data: { encryptionPayload: data, expires }
+        data: { encryptionPayload, expires }
       })
     }
   } catch (e) {
@@ -133,9 +128,9 @@ const callRouter = Router({ mergeParams: true })
 callRouter.post('/new', async(req, res) => {
   const callId = uuidv4()
   const { sessionId } = req.params
-  const { data, dappName = 'Unknown DApp' } = req.body
+  const { encryptionPayload, dappName = 'Unknown DApp' } = req.body
   try {
-    const callData = { encryptionPayload: data, timestamp: Date.now() }
+    const callData = { encryptionPayload, timestamp: Date.now() }
     await keystore.setCallRequest(callId, callData)
     await keystore.setTTL(
       keystore.getCallKey(callId),
@@ -143,16 +138,8 @@ callRouter.post('/new', async(req, res) => {
     )
 
     // notify wallet app using push notification
-    const { fcmToken, pushEndpoint } = await keystore.getSessionDetails(
-      sessionId
-    )
-    await sendPushNotification(
-      fcmToken,
-      pushEndpoint,
-      sessionId,
-      callId,
-      dappName
-    )
+    const pushData = await keystore.getSessionDetails(sessionId)
+    await sendPushNotification(pushData, sessionId, callId, dappName)
 
     // return call id
     return res.status(201).json({
@@ -198,9 +185,9 @@ const callStatusRouter = Router({ mergeParams: true })
 // create new call status
 callStatusRouter.post('/new', async(req, res) => {
   const { callId } = req.params
-  const { data } = req.body
+  const { encryptionPayload } = req.body
   try {
-    await keystore.setCallStatus(callId, { encryptionPayload: data })
+    await keystore.setCallStatus(callId, { encryptionPayload })
 
     return res.status(201).json({
       success: true,
