@@ -67,13 +67,12 @@ sessionRouter.post('/new', async(req, res) => {
 })
 
 sessionRouter.put('/:sessionId', async(req, res) => {
-  const { fcmToken, pushEndpoint, data } = req.body
+  const { pushData, data } = req.body
   const { sessionId } = req.params
   try {
     // unencrypted details
     await keystore.setSessionDetails(sessionId, {
-      fcmToken,
-      pushEndpoint
+      pushData
     })
 
     // encrypted data
