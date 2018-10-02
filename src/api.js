@@ -67,12 +67,11 @@ sessionRouter.post('/new', async(req, res) => {
 })
 
 sessionRouter.put('/:sessionId', async(req, res) => {
-  const { approved, push, encryptionPayload } = req.body
+  const { push, encryptionPayload } = req.body
   const { sessionId } = req.params
   try {
     // unencrypted details
     await keystore.setSessionDetails(sessionId, {
-      approved,
       push
     })
 
