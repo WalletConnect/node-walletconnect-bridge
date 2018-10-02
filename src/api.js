@@ -67,16 +67,16 @@ sessionRouter.post('/new', async(req, res) => {
 })
 
 sessionRouter.put('/:sessionId', async(req, res) => {
-  const { pushData, data } = req.body
+  const { push, encryptionPayload } = req.body
   const { sessionId } = req.params
   try {
     // unencrypted details
     await keystore.setSessionDetails(sessionId, {
-      pushData
+      push
     })
 
     // encrypted data
-    await keystore.setSessionData(sessionId, data)
+    await keystore.setSessionData(sessionId, encryptionPayload)
 
     const ttlInSeconds = config.walletconnect.sessionExpiration
 
@@ -137,8 +137,8 @@ callRouter.post('/new', async(req, res) => {
     )
 
     // notify wallet app using push notification
-    const pushData = await keystore.getSessionDetails(sessionId)
-    await sendPushNotification(pushData, sessionId, callId, dappName)
+    const { push } = await keystore.getSessionDetails(sessionId)
+    await sendPushNotification(push, sessionId, callId, dappName)
 
     // return call id
     return res.status(201).json({
