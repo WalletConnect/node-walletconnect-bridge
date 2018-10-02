@@ -97,15 +97,15 @@ sessionRouter.put('/:sessionId', async(req, res) => {
 sessionRouter.get('/:sessionId', async(req, res) => {
   try {
     const { sessionId } = req.params
-    const details = await keystore.getSessionDetails(sessionId)
+    // const details = await keystore.getSessionDetails(sessionId)
     const encryptionPayload = await keystore.getSessionData(sessionId)
 
     const ttlInSeconds = await keystore.getSessionExpiry(sessionId)
     const expires = getExpirationTime(ttlInSeconds)
 
-    if (encryptionPayload && details) {
+    if (encryptionPayload) {
       return res.json({
-        data: { encryptionPayload, expires, approved: details.approved }
+        data: { encryptionPayload, expires }
       })
     }
   } catch (e) {
