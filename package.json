@@ -22,13 +22,13 @@
     "url": "https://github.com/walletconnect/node-walletconnect-bridge/issues"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
-    "babel-eslint": "^8.2.2",
-    "babel-loader": "^7.1.4",
-    "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.6.1",
+    "@babel/cli": "^7.1.2",
+    "@babel/core": "^7.1.2",
+    "@babel/plugin-transform-runtime": "^7.1.0",
+    "@babel/preset-env": "^7.1.0",
+    "@babel/register": "^7.0.0",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.4",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.11.0",
@@ -37,6 +37,7 @@
     "eslint-plugin-standard": "^3.0.1"
   },
   "dependencies": {
+    "@babel/runtime": "^7.1.2",
     "axios": "^0.18.0",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
