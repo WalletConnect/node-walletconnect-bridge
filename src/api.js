@@ -11,14 +11,14 @@ import pkg from '../package.json'
 // Send push notification
 //
 
-function sendPushNotification(pushData, sessionId, callId) {
+function sendPushNotification(pushWebhook, sessionId, callId) {
   const payload = {
     sessionId,
     callId
   }
 
   return axios({
-    url: pushData.endpoint,
+    url: pushWebhook,
     method: 'POST',
     timeout: 3000,
     headers: { 'Content-Type': 'application/json' },
@@ -74,13 +74,13 @@ sessionRouter.post('/new', async(req, res) => {
 })
 
 sessionRouter.put('/:sessionId', async(req, res) => {
-  const { push, encryptionPayload } = req.body
+  const { pushWebhook, encryptionPayload } = req.body
   const { sessionId } = req.params
   try {
-    if (push && typeof push === 'object') {
+    if (pushWebhook && typeof push === 'string') {
       // unencrypted details
       await keystore.setSessionDetails(sessionId, {
-        push
+        pushWebhook
       })
     }
 
@@ -146,9 +146,9 @@ callRouter.post('/new', async(req, res) => {
     )
 
     // notify wallet app using push notification
-    const { push } = await keystore.getSessionDetails(sessionId)
-    if (push) {
-      await sendPushNotification(push, sessionId, callId)
+    const { pushWebhook } = await keystore.getSessionDetails(sessionId)
+    if (pushWebhook) {
+      await sendPushNotification(pushWebhook, sessionId, callId)
     }
 
     // return call id
