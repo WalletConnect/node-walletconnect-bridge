@@ -150,7 +150,9 @@ callRouter.post('/new', async(req, res) => {
 
     // notify wallet app using push notification
     const { push } = await keystore.getSessionDetails(sessionId)
-    await sendPushNotification(push, sessionId, callId, dappName)
+    if (push) {
+      await sendPushNotification(push, sessionId, callId, dappName)
+    }
 
     // return call id
     return res.status(201).json({
