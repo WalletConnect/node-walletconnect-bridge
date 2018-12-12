@@ -11,13 +11,10 @@ import pkg from '../package.json'
 // Send push notification
 //
 
-function sendPushNotification(pushData, sessionId, callId, dappName) {
+function sendPushNotification(pushData, sessionId, callId) {
   const payload = {
     sessionId,
-    callId,
-    pushType: pushData.type,
-    pushToken: pushData.token,
-    dappName
+    callId
   }
 
   return axios({
@@ -139,7 +136,7 @@ const callRouter = Router({ mergeParams: true })
 callRouter.post('/new', async(req, res) => {
   const callId = uuidv4()
   const { sessionId } = req.params
-  const { encryptionPayload, dappName = 'Unknown DApp' } = req.body
+  const { encryptionPayload } = req.body
   try {
     const callData = { encryptionPayload, timestamp: Date.now() }
     await keystore.setCallRequest(callId, callData)
@@ -151,7 +148,7 @@ callRouter.post('/new', async(req, res) => {
     // notify wallet app using push notification
     const { push } = await keystore.getSessionDetails(sessionId)
     if (push) {
-      await sendPushNotification(push, sessionId, callId, dappName)
+      await sendPushNotification(push, sessionId, callId)
     }
 
     // return call id
