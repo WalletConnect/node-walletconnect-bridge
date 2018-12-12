@@ -5,6 +5,7 @@ import axios from 'axios'
 import config from './config'
 import * as keystore from './keystore'
 import { getExpirationTime } from './time'
+import pkg from '../package.json'
 
 //
 // Send push notification
@@ -37,7 +38,16 @@ const router = Router()
 
 // Add hello route
 router.get('/hello', async(req, res) => {
-  return res.send('Hello World, this is WalletConnect')
+  return res.send(`Hello World, this is WalletConnect v${pkg.version}`)
+})
+
+// Add info route
+router.get('/info', async(req, res) => {
+  return res.send({
+    name: 'WalletConnect Brdige Server',
+    repository: pkg.name,
+    version: pkg.version
+  })
 })
 
 //
@@ -70,10 +80,12 @@ sessionRouter.put('/:sessionId', async(req, res) => {
   const { push, encryptionPayload } = req.body
   const { sessionId } = req.params
   try {
-    // unencrypted details
-    await keystore.setSessionDetails(sessionId, {
-      push
-    })
+    if (push && typeof push === 'object') {
+      // unencrypted details
+      await keystore.setSessionDetails(sessionId, {
+        push
+      })
+    }
 
     // encrypted data
     await keystore.setSessionData(sessionId, encryptionPayload)

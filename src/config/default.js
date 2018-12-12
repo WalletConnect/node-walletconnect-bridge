@@ -28,7 +28,7 @@ export default {
       10
     ),
     callExpiration: parseInt(
-      process.env.WALLETCONNECT_TX_EXPIRATION || 60 * 60, // 24 hours
+      process.env.WALLETCONNECT_CALL_EXPIRATION || 60 * 60, // 24 hours
       10
     )
   }
