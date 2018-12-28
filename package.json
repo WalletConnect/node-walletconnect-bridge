@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf build",
-    "build-server": "./node_modules/.bin/babel ./src/ --out-dir ./build/",
+    "build-server": "babel ./src/ --out-dir ./build/",
     "build": "npm run clean && npm run build-server",
     "start": "pm2 start processes.json",
     "lint": "eslint src/",
@@ -24,6 +24,7 @@
   "devDependencies": {
     "@babel/cli": "^7.1.2",
     "@babel/core": "^7.1.2",
+    "@babel/node": "^7.2.2",
     "@babel/plugin-transform-runtime": "^7.1.0",
     "@babel/preset-env": "^7.1.0",
     "@babel/register": "^7.0.0",
