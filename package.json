@@ -1,19 +1,29 @@
 {
   "name": "node-walletconnect-bridge",
-  "version": "0.7.11",
-  "description": "Bridge server for walletconnect standard",
+  "description": "WalletConnect Bridge Server",
+  "version": "1.0.0-beta",
   "private": true,
-  "scripts": {
-    "clean": "rm -rf build",
-    "build-server": "./node_modules/.bin/babel ./src/ --out-dir ./build/",
-    "build": "npm run clean && npm run build-server",
-    "start": "pm2 start processes.json",
-    "lint": "eslint src/",
-    "dev": "babel-node src/index.js"
-  },
+  "keywords": [
+    "walletconnect",
+    "ethereum",
+    "web3",
+    "crypto"
+  ],
   "author": "WalletConnect <walletconnect.org>",
   "homepage": "https://walletconnect.org",
   "license": "LGPL-3.0",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "fastify": "^1.13.4",
+    "fastify-helmet": "^3.0.0",
+    "ws": "^6.1.2"
+  },
+  "scripts": {
+    "dev": "babel-node --extensions '.ts' src/index.ts",
+    "build": "babel ./src --extensions '.ts' --out-dir ./build",
+    "test": "mocha --require ./babel-polyfill.js test/**/*.spec.ts",
+    "start": "node ./build"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/walletconnect/node-walletconnect-bridge.git"
@@ -24,27 +34,24 @@
   "devDependencies": {
     "@babel/cli": "^7.1.2",
     "@babel/core": "^7.1.2",
-    "@babel/plugin-transform-runtime": "^7.1.0",
+    "@babel/node": "^7.0.0",
+    "@babel/polyfill": "^7.0.0",
     "@babel/preset-env": "^7.1.0",
+    "@babel/preset-typescript": "^7.1.0",
     "@babel/register": "^7.0.0",
-    "babel-eslint": "^10.0.1",
-    "babel-loader": "^8.0.4",
-    "eslint": "^4.19.1",
-    "eslint-config-standard": "^11.0.0",
-    "eslint-plugin-import": "^2.11.0",
-    "eslint-plugin-node": "^6.0.1",
-    "eslint-plugin-promise": "^3.7.0",
-    "eslint-plugin-standard": "^3.0.1"
-  },
-  "dependencies": {
-    "@babel/runtime": "^7.1.2",
-    "axios": "^0.18.0",
-    "bluebird": "^3.5.1",
-    "body-parser": "^1.18.2",
-    "dotenv": "^5.0.1",
-    "express": "^4.16.3",
-    "express-list-endpoints": "^3.0.1",
-    "redis": "^2.8.0",
-    "uuid": "^3.2.1"
+    "@types/axios": "^0.14.0",
+    "@types/chai": "^4.1.6",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.0",
+    "@types/ws": "^6.0.1",
+    "eslint": "^5.8.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "tslint": "^5.11.0",
+    "tslint-config-standard": "^8.0.1",
+    "typescript": "^3.1.3"
   }
 }
