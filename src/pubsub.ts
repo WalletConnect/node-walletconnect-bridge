@@ -51,25 +51,31 @@ export default (socket: WebSocket, data: WebSocket.Data) => {
   const message: string = String(data)
 
   if (message) {
-    let socketMessage: ISocketMessage
-
-    try {
-      socketMessage = JSON.parse(message)
-
-      console.log('IN  =>', socketMessage)
-
-      switch (socketMessage.type) {
-        case 'sub':
-          SubController(socket, socketMessage)
-          break
-        case 'pub':
-          PubController(socketMessage)
-          break
-        default:
-          break
+    if (message === 'ping') {
+      if (socket.readyState === 1) {
+        socket.send('pong')
       }
-    } catch (e) {
-      console.error(e)
+    } else {
+      let socketMessage: ISocketMessage
+
+      try {
+        socketMessage = JSON.parse(message)
+
+        console.log('IN  =>', socketMessage)
+
+        switch (socketMessage.type) {
+          case 'sub':
+            SubController(socket, socketMessage)
+            break
+          case 'pub':
+            PubController(socketMessage)
+            break
+          default:
+            break
+        }
+      } catch (e) {
+        console.error(e)
+      }
     }
   }
 }
