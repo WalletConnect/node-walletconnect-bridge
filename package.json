@@ -14,6 +14,8 @@
   "license": "LGPL-3.0",
   "dependencies": {
     "axios": "^0.18.0",
+    "babel-polyfill": "^6.26.0",
+    "core-js": "^2.6.5",
     "fastify": "^1.13.4",
     "fastify-helmet": "^3.0.0",
     "ws": "^6.1.2"
@@ -21,6 +23,7 @@
   "scripts": {
     "dev": "babel-node --extensions '.ts' src/index.ts",
     "build": "babel ./src --extensions '.ts' --out-dir ./build",
+    "build:docker": "yarn build && docker build -t walletconnect/node-walletconnect-bridge .",
     "test": "mocha --require ./babel-polyfill.js test/**/*.spec.ts",
     "start": "node ./build"
   },

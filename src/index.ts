@@ -10,6 +10,11 @@ const app = fastify({ logger: config.debug })
 
 app.register(Helmet)
 
+// for container health checks
+app.get('/health', (_, res) => {
+  res.status(204).send()
+})
+
 app.get('/hello', (req, res) => {
   res.status(200).send(`Hello World, this is WalletConnect v${pkg.version}`)
 })
@@ -54,10 +59,9 @@ app.ready(() => {
   })
 })
 
-app.listen(config.port, (error: Error) => {
-  if (error) {
-    return console.log('Something went wrong', error)
-  }
-
-  console.log('Server listening on port', config.port)
+const [host, port] = config.host.split(':')
+app.listen(+port, host, (err, address) => {
+  if (err) throw err
+  console.log(`Server listening on ${address}`)
+  app.log.info(`Server listening on ${address}`)
 })
