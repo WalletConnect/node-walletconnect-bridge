@@ -1,6 +1,5 @@
 import WebSocket from 'ws'
 import { ISocketMessage, ISocketSub } from './types'
-import { getNotification } from './notification'
 
 const subs: ISocketSub[] = []
 const pubs: ISocketMessage[] = []

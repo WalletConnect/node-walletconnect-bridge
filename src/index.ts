@@ -54,10 +54,9 @@ app.ready(() => {
   })
 })
 
-app.listen(config.port, (error: Error) => {
-  if (error) {
-    return console.log('Something went wrong', error)
-  }
-
-  console.log('Server listening on port', config.port)
+const [host, port] = config.host.split(':')
+app.listen(+port, host, (err, address) => {
+  if (err) throw err
+  console.log(`Server listening on ${address}`)
+  app.log.info(`Server listening on ${address}`)
 })
