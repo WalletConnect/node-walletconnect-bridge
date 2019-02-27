@@ -10,6 +10,11 @@ const app = fastify({ logger: config.debug })
 
 app.register(Helmet)
 
+// for container health checks
+app.get('/health', (_, res) => {
+  res.status(204).send()
+})
+
 app.get('/hello', (req, res) => {
   res.status(200).send(`Hello World, this is WalletConnect v${pkg.version}`)
 })
