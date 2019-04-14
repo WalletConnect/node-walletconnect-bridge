@@ -1,5 +1,6 @@
 import WebSocket from 'ws'
 import { ISocketMessage, ISocketSub } from './types'
+import { pushNotification } from './notification'
 
 const subs: ISocketSub[] = []
 const pubs: ISocketMessage[] = []
@@ -37,6 +38,9 @@ const SubController = (socket: WebSocket, socketMessage: ISocketMessage) => {
 
 const PubController = (socketMessage: ISocketMessage) => {
   const subscribers = getSub(socketMessage.topic)
+
+  // send push notifications
+  pushNotification(socketMessage.topic)
 
   if (subscribers.length) {
     subscribers.forEach((subscriber: ISocketSub) =>
