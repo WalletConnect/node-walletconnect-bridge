@@ -17,6 +17,8 @@ function socketSend (socket: WebSocket, socketMessage: ISocketMessage) {
   if (socket.readyState === 1) {
     console.log('OUT =>', socketMessage)
     socket.send(JSON.stringify(socketMessage))
+  } else {
+    setPub(socketMessage)
   }
 }
 
