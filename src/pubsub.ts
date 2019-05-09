@@ -2,14 +2,10 @@ import WebSocket from 'ws'
 import { ISocketMessage, ISocketSub } from './types'
 import { pushNotification } from './notification'
 
-let subs: ISocketSub[] = []
+const subs: ISocketSub[] = []
 const pubs: ISocketMessage[] = []
 
-const setSub = (subscriber: ISocketSub) => {
-  const _subs = subs.filter(sub => sub.topic !== subscriber.topic)
-  _subs.push(subscriber)
-  subs = _subs
-}
+const setSub = (subscriber: ISocketSub) => subs.push(subscriber)
 const getSub = (topic: string) =>
   subs.filter(subscriber => subscriber.topic === topic)
 
@@ -49,9 +45,11 @@ const PubController = (socketMessage: ISocketMessage) => {
   pushNotification(socketMessage.topic)
 
   if (subscribers.length) {
-    subscribers.forEach((subscriber: ISocketSub) =>
-      socketSend(subscriber.socket, socketMessage)
-    )
+    subscribers
+      .filter((subscriber: ISocketSub) => subscriber.socket.readyState === 1)
+      .forEach((subscriber: ISocketSub) =>
+        socketSend(subscriber.socket, socketMessage)
+      )
   } else {
     setPub(socketMessage)
   }
