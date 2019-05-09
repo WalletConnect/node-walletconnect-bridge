@@ -7,7 +7,10 @@ const pubs: ISocketMessage[] = []
 
 const setSub = (subscriber: ISocketSub) => subs.push(subscriber)
 const getSub = (topic: string) =>
-  subs.filter(subscriber => subscriber.topic === topic)
+  subs.filter(
+    subscriber =>
+      subscriber.topic === topic && subscriber.socket.readyState === 1
+  )
 
 const setPub = (socketMessage: ISocketMessage) => pubs.push(socketMessage)
 const getPub = (topic: string) =>
@@ -45,11 +48,9 @@ const PubController = (socketMessage: ISocketMessage) => {
   pushNotification(socketMessage.topic)
 
   if (subscribers.length) {
-    subscribers
-      .filter((subscriber: ISocketSub) => subscriber.socket.readyState === 1)
-      .forEach((subscriber: ISocketSub) =>
-        socketSend(subscriber.socket, socketMessage)
-      )
+    subscribers.forEach((subscriber: ISocketSub) =>
+      socketSend(subscriber.socket, socketMessage)
+    )
   } else {
     setPub(socketMessage)
   }
