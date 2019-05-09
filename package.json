@@ -25,7 +25,8 @@
     "build": "babel ./src --extensions '.ts' --out-dir ./build",
     "build:docker": "yarn build && docker build -t walletconnect/node-walletconnect-bridge .",
     "test": "mocha --require ./babel-polyfill.js test/**/*.spec.ts",
-    "start": "node ./build"
+    "start": "node ./build",
+    "deploy": "NODE_ENV=production pm2 start ./build --name=bridge"
   },
   "repository": {
     "type": "git",
