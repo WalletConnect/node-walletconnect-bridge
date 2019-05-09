@@ -2,10 +2,14 @@ import WebSocket from 'ws'
 import { ISocketMessage, ISocketSub } from './types'
 import { pushNotification } from './notification'
 
-const subs: ISocketSub[] = []
+let subs: ISocketSub[] = []
 const pubs: ISocketMessage[] = []
 
-const setSub = (subscriber: ISocketSub) => subs.push(subscriber)
+const setSub = (subscriber: ISocketSub) => {
+  const _subs = subs.filter(sub => sub.topic !== subscriber.topic)
+  _subs.push(subscriber)
+  subs = _subs
+}
 const getSub = (topic: string) =>
   subs.filter(subscriber => subscriber.topic === topic)
 
