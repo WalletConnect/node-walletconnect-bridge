@@ -3,7 +3,7 @@ import { ISocketMessage, ISocketSub } from './types'
 import { pushNotification } from './notification'
 
 const subs: ISocketSub[] = []
-const pubs: ISocketMessage[] = []
+let pubs: ISocketMessage[] = []
 
 const setSub = (subscriber: ISocketSub) => subs.push(subscriber)
 const getSub = (topic: string) =>
@@ -13,8 +13,11 @@ const getSub = (topic: string) =>
   )
 
 const setPub = (socketMessage: ISocketMessage) => pubs.push(socketMessage)
-const getPub = (topic: string) =>
-  pubs.filter(pending => pending.topic === topic)
+const getPub = (topic: string) => {
+  const matching = pubs.filter(pending => pending.topic === topic)
+  pubs = pubs.filter(pending => pending.topic !== topic)
+  return matching
+}
 
 function socketSend (socket: WebSocket, socketMessage: ISocketMessage) {
   if (socket.readyState === 1) {
