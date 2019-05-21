@@ -28,13 +28,7 @@ function socketSend (socket: WebSocket, socketMessage: ISocketMessage) {
   }
 }
 
-const SubController = (socket: WebSocket, socketMessage: ISocketMessage) => {
-  const topic = socketMessage.topic
-
-  const subscriber = { topic, socket }
-
-  setSub(subscriber)
-
+function pushPending (socket: WebSocket, topic: string) {
   const pending = getPub(topic)
 
   if (pending && pending.length) {
@@ -42,6 +36,16 @@ const SubController = (socket: WebSocket, socketMessage: ISocketMessage) => {
       socketSend(socket, pendingMessage)
     )
   }
+}
+
+const SubController = (socket: WebSocket, socketMessage: ISocketMessage) => {
+  const topic = socketMessage.topic
+
+  const subscriber = { topic, socket }
+
+  setSub(subscriber)
+
+  pushPending(socket, topic)
 }
 
 const PubController = (socketMessage: ISocketMessage) => {
@@ -59,11 +63,22 @@ const PubController = (socketMessage: ISocketMessage) => {
   }
 }
 
+function handleStale (socket: WebSocket) {
+  const matches = subs.filter(subscriber => subscriber.socket === socket)
+  if (matches && matches.length) {
+    matches.forEach((sub: ISocketSub) => {
+      const { socket, topic } = sub
+      pushPending(socket, topic)
+    })
+  }
+}
+
 export default (socket: WebSocket, data: WebSocket.Data) => {
   const message: string = String(data)
 
   if (message) {
     if (message === 'ping') {
+      handleStale(socket)
       if (socket.readyState === 1) {
         socket.send('pong')
       }
