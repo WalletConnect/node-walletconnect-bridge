@@ -19,10 +19,15 @@ const getPub = (topic: string) => {
   return matching
 }
 
+function log (type: string, message: string) {
+  console.log({ log: true, type, message })
+}
+
 function socketSend (socket: WebSocket, socketMessage: ISocketMessage) {
   if (socket.readyState === 1) {
-    console.log('OUT =>', socketMessage)
-    socket.send(JSON.stringify(socketMessage))
+    const message = JSON.stringify(socketMessage)
+    log('outgoing', message)
+    socket.send(message)
   } else {
     setPub(socketMessage)
   }
@@ -70,10 +75,10 @@ export default (socket: WebSocket, data: WebSocket.Data) => {
     } else {
       let socketMessage: ISocketMessage
 
+      log('incoming', message)
+
       try {
         socketMessage = JSON.parse(message)
-
-        console.log('IN  =>', socketMessage)
 
         switch (socketMessage.type) {
           case 'sub':
