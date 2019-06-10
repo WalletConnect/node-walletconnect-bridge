@@ -8,17 +8,18 @@ ENV HOST="0.0.0.0:5000"
 WORKDIR /usr/src/app
 
 COPY package*.json yarn.lock ./
-RUN apt update
-RUN apt install -y curl sudo
+RUN apt-get update
+RUN apt-get install -y curl sudo
 RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash
 
-RUN apt install -y $PACKAGES
+RUN apt-get install -y ${PACKAGES}
 RUN npm i -g yarn
 RUN yarn --prod
 
+RUN add-apt-repository universe
 RUN add-apt-repository ppa:certbot/certbot
 RUN apt-get update
-RUN apt-get install -y python-certbot-nginx
+RUN apt-get install certbot python-certbot-nginx  -y
     
 COPY source /source
 
