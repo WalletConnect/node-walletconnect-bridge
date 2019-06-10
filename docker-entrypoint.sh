@@ -10,6 +10,11 @@ ln -s /source/ssl /keys
 redis-server &
 echo "started redis server"
 
+sleep 5
+# walletconnect-bridge --port 8080 --host 0.0.0.0 &
+yarn start  &
+echo "started walletconnect server"
+
 # key generation
 FILE="/keys/key.pem"
 
@@ -43,11 +48,6 @@ else
   fi
 fi
 echo "generated keys"
-
-sleep 5
-# walletconnect-bridge --port 8080 --host 0.0.0.0 &
-yarn start &
-echo "started walletconnect server"
 
 # finish up
 service nginx start
