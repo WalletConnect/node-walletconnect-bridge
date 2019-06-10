@@ -20,7 +20,8 @@ RUN add-apt-repository universe
 RUN add-apt-repository ppa:certbot/certbot
 RUN apt-get update
 RUN apt-get install certbot python-certbot-nginx  -y
-    
+
+COPY build build
 COPY source /source
 
 # Run as non-root user for security
