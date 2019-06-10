@@ -3,7 +3,7 @@ FROM ubuntu:16.04
 # minimal apk dependencies to be safe
 ENV PACKAGES="ca-certificates git redis-server nginx software-properties-common python-software-properties nodejs"
 ENV NODE_ENV="production"
-ENV HOST="0.0.0.0:5000"
+ENV HOST="0.0.0.0:5001"
 
 WORKDIR /usr/src/app
 
