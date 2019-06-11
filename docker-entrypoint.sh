@@ -2,8 +2,8 @@
 set -e
 
 # linking
-rm -rf /etc/nginx/sites-enabled
-ln -s /source/nginx /etc/nginx/sites-enabled
+rm -rf /etc/nginx/sites-available/default
+ln -s /source/nginx/defaultConf /etc/nginx/sites-available/default
 ln -s /source/ssl /keys
 
 # starting local instance of redis server and starting walletconnect bridge connected to local redis
@@ -31,6 +31,8 @@ if [ ! -f $FILE ]; then
 fi
 echo "Openssl finished"
 
+# starting Nging
+service nginx start
 if [ `ls /source/ssl/certbot` ]; then
   #copy keys from local
   echo "copying previously generated keys"
@@ -50,7 +52,7 @@ fi
 echo "generated keys"
 
 # finish up
-service nginx start
+service nginx restart
 echo "started nginx service"
 #now sleeping infinitely
 tail -f /dev/null

@@ -27,12 +27,10 @@ COPY source /source
 # Run as non-root user for security
 # USER 1000
 
-# Expose app port (5000/tcp)
-EXPOSE 5000
-
 # CMD [ "yarn", "start" ]
 
 COPY docker-entrypoint.sh /bin/
 RUN sudo chmod +x /bin/docker-entrypoint.sh
+
 ENTRYPOINT ["/bin/docker-entrypoint.sh"]
 
