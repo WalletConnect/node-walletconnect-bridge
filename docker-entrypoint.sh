@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+export NODE_ENV="production"
+export HOST="0.0.0.0:5001"
+
 # linking
 rm -rf /etc/nginx/sites-available/default
 ln -s /source/nginx/defaultConf /etc/nginx/sites-available/default

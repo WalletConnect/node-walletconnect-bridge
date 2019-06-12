@@ -2,32 +2,36 @@ FROM ubuntu:16.04
 
 # minimal apk dependencies to be safe
 ENV PACKAGES="ca-certificates git redis-server nginx software-properties-common python-software-properties nodejs"
-ENV NODE_ENV="production"
-ENV HOST="0.0.0.0:5001"
 
-WORKDIR /usr/src/app
-
-COPY package*.json yarn.lock ./
 RUN apt-get update
 RUN apt-get install -y curl sudo
 RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash
 
 RUN apt-get install -y ${PACKAGES}
 RUN npm i -g yarn
-RUN yarn --prod
 
 RUN add-apt-repository universe
 RUN add-apt-repository ppa:certbot/certbot
 RUN apt-get update
 RUN apt-get install certbot python-certbot-nginx  -y
 
-COPY build build
-COPY source /source
+# RUN groupadd --gid 1000 dockeruser
+# RUN useradd --uid 1000 --gid 1000 dockeruser
 
 # Run as non-root user for security
 # USER 1000
 
-# CMD [ "yarn", "start" ]
+WORKDIR /usr/src/app
+
+COPY src src
+COPY package.json .
+COPY .babelrc .
+COPY babel-polyfill.js .
+COPY tsconfig.json .
+COPY tslint.json .
+RUN yarn install  # installing all dependencies
+
+RUN yarn build
 
 COPY docker-entrypoint.sh /bin/
 RUN sudo chmod +x /bin/docker-entrypoint.sh
