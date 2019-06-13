@@ -5,8 +5,6 @@ import config from './config'
 // redis client
 const redisClient = config.redisClient
 
-const notifications: INotification[] = []
-
 export const setNotification = (notification: INotification) =>
   redisClient.lpushAsync(`notification:${notification.topic}`, JSON.stringify(notification))
 

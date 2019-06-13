@@ -6,9 +6,6 @@ import config from './config'
 // redis client
 const redisClient = config.redisClient
 
-const subs: ISocketSub[] = []
-let pubs: ISocketMessage[] = []
-
 const setSub = (subscriber: ISocketSub) =>
   redisClient.lpushAsync(`subscriber:${subscriber.topic}`, JSON.stringify(subscriber))
 
