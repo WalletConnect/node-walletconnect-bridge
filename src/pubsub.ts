@@ -1,22 +1,37 @@
 import WebSocket from 'ws'
 import { ISocketMessage, ISocketSub } from './types'
 import { pushNotification } from './notification'
+import config from './config'
+
+// redis client
+const redisClient = config.redisClient
 
 const subs: ISocketSub[] = []
 let pubs: ISocketMessage[] = []
 
-const setSub = (subscriber: ISocketSub) => subs.push(subscriber)
-const getSub = (topic: string) =>
-  subs.filter(
-    subscriber =>
-      subscriber.topic === topic && subscriber.socket.readyState === 1
-  )
+const setSub = (subscriber: ISocketSub) =>
+  redisClient.lpushAsync(`subscriber:${subscriber.topic}`, JSON.stringify(subscriber))
 
-const setPub = (socketMessage: ISocketMessage) => pubs.push(socketMessage)
-const getPub = (topic: string) => {
-  const matching = pubs.filter(pending => pending.topic === topic)
-  pubs = pubs.filter(pending => pending.topic !== topic)
-  return matching
+export const getSub = (topic: string): ISocketSub[] => {
+  return redisClient.lrangeAsync(`subscriber:${topic}`, 0, -1).then(data => {
+    if (data) {
+      let localData: ISocketSub[] = data.map((item: string) => JSON.parse(item))
+      return localData.filter((subscriber: ISocketSub) => subscriber.socket.readyState === 1)
+    }
+  })
+}
+
+const setPub = (socketMessage: ISocketMessage) => {
+  redisClient.lpushAsync(`socketMessage:${socketMessage.topic}`, JSON.stringify(socketMessage))
+}
+const getPub = (topic: string): ISocketMessage[] => {
+  return redisClient.lrangeAsunc(`socketMessage:${topic}`, 0, -1).then(data => {
+    if (data) {
+      let localData: ISocketMessage[] = data.map((item: string) => JSON.parse(item))
+      redisClient.del(`socketMessage:${topic}`)
+      return localData
+    }
+  })
 }
 
 function socketSend (socket: WebSocket, socketMessage: ISocketMessage) {
