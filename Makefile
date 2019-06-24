@@ -8,7 +8,7 @@ default:
 	echo "Available tasks: setup, build, clean, renew, run, run_skip_certbot, run_daemon, run_daemon_skip_certbot, update"
 
 setup:
-	sed -i -e 's/bridge.mydomain.com/$(URL)/g' nginx/defaultConf && rm -rf nginx/defaultConf-e
+	sed -i -e 's/bridge.mydomain.com/$(URL)/g' $(shell pwd)/source:/source/nginx/defaultConf && rm -rf $(shell pwd)/source:/source/nginx/defaultConf-e
 
 build:
 	docker build . -t walletconnect/node-walletconnect-bridge 
