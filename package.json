@@ -15,9 +15,11 @@
   "dependencies": {
     "axios": "^0.19.0",
     "babel-polyfill": "^6.26.0",
+    "bluebird": "^3.5.5",
     "core-js": "2",
     "fastify": "^2.4.1",
     "fastify-helmet": "^3.0.0",
+    "redis": "^2.8.0",
     "ws": "^7.0.0"
   },
   "scripts": {
@@ -44,9 +46,11 @@
     "@babel/preset-typescript": "^7.1.0",
     "@babel/register": "^7.0.0",
     "@types/axios": "^0.14.0",
+    "@types/bluebird": "^3.5.27",
     "@types/chai": "^4.1.6",
     "@types/mocha": "^5.2.5",
     "@types/node": "^12.0.8",
+    "@types/redis": "^2.8.13",
     "@types/ws": "^6.0.1",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",

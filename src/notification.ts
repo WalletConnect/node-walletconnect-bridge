@@ -1,15 +1,23 @@
 import axios from 'axios'
 import { INotification } from './types'
+import config from './config'
 
-const notifications: INotification[] = []
+// redis client
+const redisClient = config.redisClient
 
 export const setNotification = (notification: INotification) =>
-  notifications.push(notification)
-export const getNotification = (topic: string) =>
-  notifications.filter(notification => notification.topic === topic)
+  redisClient.lpushAsync(`notification:${notification.topic}`, JSON.stringify(notification))
+
+export const getNotification = (topic: string) => {
+  return redisClient.lrangeAsync(`notification:${topic}`, 0, -1).then(data => {
+    if (data) {
+      return data
+    }
+  })
+}
 
 export const pushNotification = (topic: string) => {
-  const notifications = getNotification(topic)
+  const notifications = getNotification(topic).map((item: string) => JSON.parse(item))
 
   if (notifications && notifications.length) {
     notifications.forEach((notification: INotification) =>
