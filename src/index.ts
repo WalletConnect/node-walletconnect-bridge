@@ -3,7 +3,7 @@ import Helmet from 'fastify-helmet'
 import WebSocket from 'ws'
 import config from './config'
 import pubsub from './pubsub'
-import { setNotification } from './notification'
+import { setNotification } from './redis'
 import pkg from '../package.json'
 
 const app = fastify({ logger: config.debug })
@@ -27,7 +27,7 @@ app.get('/info', (req, res) => {
   })
 })
 
-app.post('/subscribe', (req, res) => {
+app.post('/subscribe', async (req, res) => {
   if (!req.body || typeof req.body !== 'object') {
     res.status(400).send({
       message: 'Error: missing or invalid request body'
@@ -48,7 +48,7 @@ app.post('/subscribe', (req, res) => {
     })
   }
 
-  setNotification({ topic, webhook })
+  await setNotification({ topic, webhook })
 
   res.status(200).send({
     success: true
