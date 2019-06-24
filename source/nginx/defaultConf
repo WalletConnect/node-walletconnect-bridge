@@ -1,13 +1,13 @@
 server {
     listen 80;
-    server_name _;
+    server_name bridge.mydomain.com;
 
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name 11cee86c.ngrok.io;
+    server_name bridge.mydomain.com;
 
     ssl_certificate     /keys/cert.pem;
     ssl_certificate_key /keys/key.pem;
@@ -23,9 +23,9 @@ server {
         proxy_set_header        X-Real-IP $remote_addr;
         proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header        X-Forwarded-Proto $scheme;
-        proxy_pass              http://localhost:5001;
-        proxy_read_timeout      90;
-#        proxy_redirect          https://localhost:5001;
+        proxy_pass                  http://0.0.0.0:5000;
+        proxy_read_timeout    90;
+        proxy_redirect             http://0.0.0.0:5000 http://bridge.mydomain.com;
 
         # Simple requests
         if ($request_method ~* "(GET|POST)") {

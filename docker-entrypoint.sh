@@ -2,7 +2,6 @@
 set -e
 
 export NODE_ENV="production"
-export HOST="0.0.0.0:5001"
 
 # linking
 rm -rf /etc/nginx/sites-available/default
@@ -14,8 +13,8 @@ redis-server &
 echo "started redis server"
 
 sleep 5
-# walletconnect-bridge --port 8080 --host 0.0.0.0 &
-yarn start  &
+# walletconnect-bridge --port 5000 --host 0.0.0.0 &
+npm run start  &
 echo "started walletconnect server"
 
 # key generation
