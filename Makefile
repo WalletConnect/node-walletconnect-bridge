@@ -8,7 +8,7 @@ default:
 	echo "Available tasks: setup, build, clean, renew, run, run_skip_certbot, run_daemon, run_daemon_skip_certbot, update"
 
 setup:
-	sed -i -e 's/bridge.mydomain.com/$(URL)/g' $(shell pwd)/source:/source/nginx/defaultConf && rm -rf $(shell pwd)/source:/source/nginx/defaultConf-e
+	sed -i -e 's/bridge.mydomain.com/$(URL)/g' $(shell pwd)/source/nginx/defaultConf && rm -rf $(shell pwd)/source/nginx/defaultConf-e
 
 build:
 	docker build . -t walletconnect/node-walletconnect-bridge 
@@ -26,7 +26,7 @@ run_skip_certbot:
 	docker run -it -v $(shell pwd)/source:/source/ -p 443:443 -p 80:80 --name "node-walletconnect-bridge" walletconnect/node-walletconnect-bridge --skip-certbot
 
 run_daemon:
-	docker run -it -d -v $(shell pwd)/source:/source/ -p 443:443 -p 80:80 --name "node-walletconnect-bridge" walletconnect/node-walletconnect-bridgerm -
+	docker run -it -d -v $(shell pwd)/source:/source/ -p 443:443 -p 80:80 --name "node-walletconnect-bridge" walletconnect/node-walletconnect-bridge
 
 run_daemon_skip_certbot:
 	docker run -it -d -v $(shell pwd)/source:/source/ -p 443:443 -p 80:80 --name "node-walletconnect-bridge" walletconnect/node-walletconnect-bridge run_daemon --skip-certbot
