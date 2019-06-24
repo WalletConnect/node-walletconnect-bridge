@@ -14,7 +14,7 @@ echo "started redis server"
 
 sleep 5
 # walletconnect-bridge --port 5000 --host 0.0.0.0 &
-yarn start  &
+npm run start  &
 echo "started walletconnect server"
 
 # key generation

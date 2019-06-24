@@ -8,7 +8,6 @@ RUN apt-get install -y curl sudo
 RUN curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash
 
 RUN apt-get install -y ${PACKAGES}
-RUN npm i -g yarn
 
 RUN add-apt-repository universe
 RUN add-apt-repository ppa:certbot/certbot
@@ -29,9 +28,9 @@ COPY .babelrc .
 COPY babel-polyfill.js .
 COPY tsconfig.json .
 COPY tslint.json .
-RUN yarn install  # installing all dependencies
+RUN npm install  # installing all dependencies
 
-RUN yarn build
+RUN npm run build
 
 COPY docker-entrypoint.sh /bin/
 RUN sudo chmod +x /bin/docker-entrypoint.sh

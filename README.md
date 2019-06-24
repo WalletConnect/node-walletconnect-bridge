@@ -5,7 +5,7 @@ Bridge Server for relaying WalletConnect connections
 ## Development
 
 ```bash
-yarn dev
+npm run dev
 ```
 
 ## Production
@@ -15,13 +15,13 @@ yarn dev
 1. Build
 
 ```bash
-yarn build
+npm run build
 ```
 
 2. Production
 
 ```bash
-yarn start
+npm run start
 ```
 
 3. Server accessible from host:
