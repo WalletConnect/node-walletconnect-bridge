@@ -26,7 +26,7 @@ run_skip_certbot:
 	docker run -it -v $(shell pwd)/source:/source/ -p 443:443 -p 80:80 --name "node-walletconnect-bridge" walletconnect/node-walletconnect-bridge --skip-certbot
 
 run_daemon:
-	docker run -it -d -v $(shell pwd)/source:/source/ -p 443:443 -p 80:80 --name "node-walletconnect-bridge" walletconnect/node-walletconnect-bridgerm -
+	docker run -it -d -v $(shell pwd)/source:/source/ -p 443:443 -p 80:80 --name "node-walletconnect-bridge" walletconnect/node-walletconnect-bridge
 
 run_daemon_skip_certbot:
 	docker run -it -d -v $(shell pwd)/source:/source/ -p 443:443 -p 80:80 --name "node-walletconnect-bridge" walletconnect/node-walletconnect-bridge run_daemon --skip-certbot
