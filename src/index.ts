@@ -3,7 +3,7 @@ import Helmet from 'fastify-helmet'
 import WebSocket from 'ws'
 import config from './config'
 import pubsub from './pubsub'
-import { setNotification } from './redis'
+import { setNotification } from './keystore'
 import pkg from '../package.json'
 
 const app = fastify({ logger: config.debug })

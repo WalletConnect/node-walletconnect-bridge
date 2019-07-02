@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { INotification } from './types'
-import { getNotification } from './redis'
+import { getNotification } from './keystore'
 
 export const pushNotification = async (topic: string) => {
   const notifications = await getNotification(topic)
