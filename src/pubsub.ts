@@ -1,7 +1,7 @@
 import WebSocket from 'ws'
 import { ISocketMessage, ISocketSub } from './types'
 import { pushNotification } from './notification'
-import { setSub, getSub, setPub, getPub } from './redis'
+import { setSub, getSub, setPub, getPub } from './keystore'
 
 async function socketSend (socket: WebSocket, socketMessage: ISocketMessage) {
   if (socket.readyState === 1) {
@@ -26,9 +26,8 @@ const SubController = async (
 
   if (pending && pending.length) {
     await Promise.all(
-      pending.map(
-        async (pendingMessage: ISocketMessage) =>
-          await socketSend(socket, pendingMessage)
+      pending.map((pendingMessage: ISocketMessage) =>
+        socketSend(socket, pendingMessage)
       )
     )
   }
@@ -42,9 +41,8 @@ const PubController = async (socketMessage: ISocketMessage) => {
 
   if (subscribers.length) {
     await Promise.all(
-      subscribers.map(
-        async (subscriber: ISocketSub) =>
-          await socketSend(subscriber.socket, socketMessage)
+      subscribers.map((subscriber: ISocketSub) =>
+        socketSend(subscriber.socket, socketMessage)
       )
     )
   } else {
