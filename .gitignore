@@ -44,3 +44,7 @@ dist
 build
 
 .DS_Store
+
+source/ssl/*.pem
+source/ssl/certbot/*
+!source/ssl/certbot/.keep
