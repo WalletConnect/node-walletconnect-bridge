@@ -8,33 +8,21 @@ bluebird.promisifyAll(redis.Multi.prototype)
 
 const redisClient: any = redis.createClient(config.redis)
 
-export const setSub = (subscriber: ISocketSub) =>
-  redisClient.lpushAsync(
-    `subscriber:${subscriber.topic}`,
-    JSON.stringify(subscriber)
+const subs: ISocketSub[] = []
+
+export const setSub = (subscriber: ISocketSub) => subs.push(subscriber)
+export const getSub = (topic: string) =>
+  subs.filter(
+    subscriber =>
+      subscriber.topic === topic && subscriber.socket.readyState === 1
   )
 
-export const getSub = (topic: string): ISocketSub[] => {
-  return redisClient
-    .lrangeAsync(`subscriber:${topic}`, 0, -1)
-    .then((data: any) => {
-      if (data) {
-        let localData: ISocketSub[] = data.map((item: string) =>
-          JSON.parse(item)
-        )
-        return localData.filter(
-          (subscriber: ISocketSub) => subscriber.socket.readyState === 1
-        )
-      }
-    })
-}
-
-export const setPub = (socketMessage: ISocketMessage) => {
+export const setPub = (socketMessage: ISocketMessage) =>
   redisClient.lpushAsync(
     `socketMessage:${socketMessage.topic}`,
     JSON.stringify(socketMessage)
   )
-}
+
 export const getPub = (topic: string): ISocketMessage[] => {
   return redisClient
     .lrangeAsync(`socketMessage:${topic}`, 0, -1)
