@@ -29,8 +29,7 @@
     "build": "babel ./src --extensions '.ts' --out-dir ./build",
     "build:docker": "npm run build && docker build -t node-walletconnect-bridge .",
     "test": "mocha --require ./babel-polyfill.js test/**/*.spec.ts",
-    "start": "node ./build",
-    "deploy": "NODE_ENV=production pm2 start ./build --name=bridge"
+    "start": "node ./build"
   },
   "repository": {
     "type": "git",
