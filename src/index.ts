@@ -2,7 +2,7 @@ import fastify from 'fastify'
 import Helmet from 'fastify-helmet'
 import WebSocket from 'ws'
 import config from './config'
-import pubsub from './pubsub'
+import pubsub, { handleStale } from './pubsub'
 import { setNotification } from './notification'
 import pkg from '../package.json'
 
@@ -55,14 +55,41 @@ app.post('/subscribe', (req, res) => {
   })
 })
 
+function noop () {}
+
+interface IWebSocket extends WebSocket {
+  isAlive: boolean
+}
+
 const wsServer = new WebSocket.Server({ server: app.server })
 
 app.ready(() => {
-  wsServer.on('connection', (socket: WebSocket) => {
+  wsServer.on('connection', (socket: IWebSocket) => {
     socket.on('message', async data => {
       pubsub(socket, data)
     })
+
+    socket.isAlive = true
+    socket.on('pong', () => {
+      socket.isAlive = true
+      handleStale(socket)
+    })
   })
+
+  setInterval(
+    () => {
+      const sockets: any = wsServer.clients
+      sockets.forEach((socket: IWebSocket) => {
+        if (socket.isAlive === false) {
+          return socket.terminate()
+        }
+
+        socket.isAlive = false
+        socket.ping(noop)
+      })
+    },
+    10000 // 10 seconds
+  )
 })
 
 const [host, port] = config.host.split(':')

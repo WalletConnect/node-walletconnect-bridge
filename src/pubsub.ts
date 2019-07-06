@@ -19,12 +19,32 @@ const getPub = (topic: string) => {
   return matching
 }
 
-function socketSend (socket: WebSocket, socketMessage: ISocketMessage) {
+export function socketSend (socket: WebSocket, socketMessage: ISocketMessage) {
   if (socket.readyState === 1) {
     console.log('OUT =>', socketMessage)
     socket.send(JSON.stringify(socketMessage))
   } else {
     setPub(socketMessage)
+  }
+}
+
+export function pushPending (socket: WebSocket, topic: string) {
+  const pending = getPub(topic)
+
+  if (pending && pending.length) {
+    pending.forEach((pendingMessage: ISocketMessage) =>
+      socketSend(socket, pendingMessage)
+    )
+  }
+}
+
+export function handleStale (socket: WebSocket) {
+  const matches = subs.filter(subscriber => subscriber.socket === socket)
+  if (matches && matches.length) {
+    matches.forEach((sub: ISocketSub) => {
+      const { socket, topic } = sub
+      pushPending(socket, topic)
+    })
   }
 }
 
@@ -35,13 +55,7 @@ const SubController = (socket: WebSocket, socketMessage: ISocketMessage) => {
 
   setSub(subscriber)
 
-  const pending = getPub(topic)
-
-  if (pending && pending.length) {
-    pending.forEach((pendingMessage: ISocketMessage) =>
-      socketSend(socket, pendingMessage)
-    )
-  }
+  pushPending(socket, topic)
 }
 
 const PubController = (socketMessage: ISocketMessage) => {
@@ -67,27 +81,32 @@ export default (socket: WebSocket, data: WebSocket.Data) => {
       if (socket.readyState === 1) {
         socket.send('pong')
       }
-    } else {
-      let socketMessage: ISocketMessage
+      return
+    }
 
-      try {
-        socketMessage = JSON.parse(message)
+    if (message === 'pong') {
+      return
+    }
 
-        console.log('IN  =>', socketMessage)
+    let socketMessage: ISocketMessage
 
-        switch (socketMessage.type) {
-          case 'sub':
-            SubController(socket, socketMessage)
-            break
-          case 'pub':
-            PubController(socketMessage)
-            break
-          default:
-            break
-        }
-      } catch (e) {
-        console.error(e)
+    try {
+      socketMessage = JSON.parse(message)
+
+      console.log('IN  =>', socketMessage)
+
+      switch (socketMessage.type) {
+        case 'sub':
+          SubController(socket, socketMessage)
+          break
+        case 'pub':
+          PubController(socketMessage)
+          break
+        default:
+          break
       }
+    } catch (e) {
+      console.error(e)
     }
   }
 }
