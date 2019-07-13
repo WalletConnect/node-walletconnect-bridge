@@ -1,5 +1,4 @@
-import WebSocket from 'ws'
-import { ISocketMessage, ISocketSub } from './types'
+import { ISocketMessage, ISocketSub, IWebSocket, WebSocketData } from './types'
 import { pushNotification } from './notification'
 
 const subs: ISocketSub[] = []
@@ -19,7 +18,7 @@ const getPub = (topic: string) => {
   return matching
 }
 
-export function socketSend (socket: WebSocket, socketMessage: ISocketMessage) {
+export function socketSend (socket: IWebSocket, socketMessage: ISocketMessage) {
   if (socket.readyState === 1) {
     console.log('OUT =>', socketMessage)
     socket.send(JSON.stringify(socketMessage))
@@ -28,7 +27,7 @@ export function socketSend (socket: WebSocket, socketMessage: ISocketMessage) {
   }
 }
 
-export function pushPending (socket: WebSocket, topic: string) {
+export function pushPending (socket: IWebSocket, topic: string) {
   const pending = getPub(topic)
 
   if (pending && pending.length) {
@@ -38,17 +37,7 @@ export function pushPending (socket: WebSocket, topic: string) {
   }
 }
 
-export function handleStale (socket: WebSocket) {
-  const matches = subs.filter(subscriber => subscriber.socket === socket)
-  if (matches && matches.length) {
-    matches.forEach((sub: ISocketSub) => {
-      const { socket, topic } = sub
-      pushPending(socket, topic)
-    })
-  }
-}
-
-const SubController = (socket: WebSocket, socketMessage: ISocketMessage) => {
+const SubController = (socket: IWebSocket, socketMessage: ISocketMessage) => {
   const topic = socketMessage.topic
 
   const subscriber = { topic, socket }
@@ -61,7 +50,6 @@ const SubController = (socket: WebSocket, socketMessage: ISocketMessage) => {
 const PubController = (socketMessage: ISocketMessage) => {
   const subscribers = getSub(socketMessage.topic)
 
-  // send push notifications
   pushNotification(socketMessage.topic)
 
   if (subscribers.length) {
@@ -73,7 +61,7 @@ const PubController = (socketMessage: ISocketMessage) => {
   }
 }
 
-export default (socket: WebSocket, data: WebSocket.Data) => {
+export default (socket: IWebSocket, data: WebSocketData) => {
   const message: string = String(data)
 
   if (message) {

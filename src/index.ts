@@ -2,7 +2,8 @@ import fastify from 'fastify'
 import Helmet from 'fastify-helmet'
 import WebSocket from 'ws'
 import config from './config'
-import pubsub, { handleStale } from './pubsub'
+import pubsub from './pubsub'
+import { IWebSocket } from './types'
 import { setNotification } from './notification'
 import pkg from '../package.json'
 
@@ -10,7 +11,6 @@ const app = fastify({ logger: config.debug })
 
 app.register(Helmet)
 
-// for container health checks
 app.get('/health', (_, res) => {
   res.status(204).send()
 })
@@ -55,12 +55,6 @@ app.post('/subscribe', (req, res) => {
   })
 })
 
-function noop () {}
-
-interface IWebSocket extends WebSocket {
-  isAlive: boolean
-}
-
 const wsServer = new WebSocket.Server({ server: app.server })
 
 app.ready(() => {
@@ -69,10 +63,8 @@ app.ready(() => {
       pubsub(socket, data)
     })
 
-    socket.isAlive = true
     socket.on('pong', () => {
       socket.isAlive = true
-      handleStale(socket)
     })
   })
 
@@ -85,7 +77,7 @@ app.ready(() => {
         }
 
         socket.isAlive = false
-        socket.ping(noop)
+        socket.send('ping')
       })
     },
     10000 // 10 seconds
