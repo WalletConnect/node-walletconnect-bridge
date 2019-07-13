@@ -4,6 +4,10 @@ import { pushNotification } from './notification'
 const subs: ISocketSub[] = []
 let pubs: ISocketMessage[] = []
 
+function log (type: string, message: string) {
+  console.log({ log: true, type, message })
+}
+
 const setSub = (subscriber: ISocketSub) => subs.push(subscriber)
 const getSub = (topic: string) =>
   subs.filter(
@@ -20,8 +24,9 @@ const getPub = (topic: string) => {
 
 export function socketSend (socket: IWebSocket, socketMessage: ISocketMessage) {
   if (socket.readyState === 1) {
-    console.log('OUT =>', socketMessage)
-    socket.send(JSON.stringify(socketMessage))
+    const message = JSON.stringify(socketMessage)
+    log('outgoing', message)
+    socket.send(message)
   } else {
     setPub(socketMessage)
   }
@@ -78,10 +83,10 @@ export default (socket: IWebSocket, data: WebSocketData) => {
 
     let socketMessage: ISocketMessage
 
+    log('incoming', message)
+
     try {
       socketMessage = JSON.parse(message)
-
-      console.log('IN  =>', socketMessage)
 
       switch (socketMessage.type) {
         case 'sub':
