@@ -55,7 +55,10 @@ const SubController = (socket: IWebSocket, socketMessage: ISocketMessage) => {
 const PubController = (socketMessage: ISocketMessage) => {
   const subscribers = getSub(socketMessage.topic)
 
-  pushNotification(socketMessage.topic)
+
+  if (!socketMessage.silent) {
+    pushNotification(socketMessage.topic)
+  }
 
   if (subscribers.length) {
     subscribers.forEach((subscriber: ISocketSub) =>
