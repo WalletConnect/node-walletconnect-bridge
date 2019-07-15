@@ -76,8 +76,10 @@ app.ready(() => {
           return socket.terminate()
         }
 
+        function noop () {}
+
         socket.isAlive = false
-        socket.send('ping')
+        socket.ping(noop)
       })
     },
     10000 // 10 seconds
