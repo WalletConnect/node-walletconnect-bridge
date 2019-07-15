@@ -55,7 +55,6 @@ const SubController = (socket: IWebSocket, socketMessage: ISocketMessage) => {
 const PubController = (socketMessage: ISocketMessage) => {
   const subscribers = getSub(socketMessage.topic)
 
-
   if (!socketMessage.silent) {
     pushNotification(socketMessage.topic)
   }
@@ -71,38 +70,36 @@ const PubController = (socketMessage: ISocketMessage) => {
 
 export default (socket: IWebSocket, data: WebSocketData) => {
   const message: string = String(data)
+  if (!message || !message.trim()) {
+    return
+  }
 
-  if (message) {
-    if (message === 'ping') {
-      if (socket.readyState === 1) {
-        socket.send('pong')
-      }
-      return
-    }
+  log('incoming', message)
 
-    if (message === 'pong') {
-      return
-    }
-
-    let socketMessage: ISocketMessage
-
-    log('incoming', message)
+  try {
+    let socketMessage: ISocketMessage | null = null
 
     try {
       socketMessage = JSON.parse(message)
-
-      switch (socketMessage.type) {
-        case 'sub':
-          SubController(socket, socketMessage)
-          break
-        case 'pub':
-          PubController(socketMessage)
-          break
-        default:
-          break
-      }
     } catch (e) {
-      console.error(e)
+      // do nothing
     }
+
+    if (!socketMessage) {
+      return
+    }
+
+    switch (socketMessage.type) {
+      case 'sub':
+        SubController(socket, socketMessage)
+        break
+      case 'pub':
+        PubController(socketMessage)
+        break
+      default:
+        break
+    }
+  } catch (e) {
+    console.error(e)
   }
 }
