@@ -4,13 +4,13 @@ import WebSocket from 'ws'
 import config from './config'
 import pubsub from './pubsub'
 import { setNotification } from './keystore'
+import { IWebSocket } from './types'
 import pkg from '../package.json'
 
 const app = fastify({ logger: config.debug })
 
 app.register(Helmet)
 
-// for container health checks
 app.get('/health', (_, res) => {
   res.status(204).send()
 })
@@ -58,11 +58,32 @@ app.post('/subscribe', async (req, res) => {
 const wsServer = new WebSocket.Server({ server: app.server })
 
 app.ready(() => {
-  wsServer.on('connection', (socket: WebSocket) => {
+  wsServer.on('connection', (socket: IWebSocket) => {
     socket.on('message', async data => {
       pubsub(socket, data)
     })
+
+    socket.on('pong', () => {
+      socket.isAlive = true
+    })
   })
+
+  setInterval(
+    () => {
+      const sockets: any = wsServer.clients
+      sockets.forEach((socket: IWebSocket) => {
+        if (socket.isAlive === false) {
+          return socket.terminate()
+        }
+
+        function noop () {}
+
+        socket.isAlive = false
+        socket.ping(noop)
+      })
+    },
+    10000 // 10 seconds
+  )
 })
 
 const [host, port] = config.host.split(':')

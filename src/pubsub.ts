@@ -1,27 +1,25 @@
-import WebSocket from 'ws'
-import { ISocketMessage, ISocketSub } from './types'
+import { ISocketMessage, ISocketSub, IWebSocket, WebSocketData } from './types'
 import { pushNotification } from './notification'
 import { setSub, getSub, setPub, getPub } from './keystore'
 
-async function socketSend (socket: WebSocket, socketMessage: ISocketMessage) {
+function log (type: string, message: string) {
+  console.log({ log: true, type, message })
+}
+
+export async function socketSend (
+  socket: IWebSocket,
+  socketMessage: ISocketMessage
+) {
   if (socket.readyState === 1) {
-    console.log('OUT =>', socketMessage)
-    socket.send(JSON.stringify(socketMessage))
+    const message = JSON.stringify(socketMessage)
+    log('outgoing', message)
+    socket.send(message)
   } else {
     await setPub(socketMessage)
   }
 }
 
-const SubController = async (
-  socket: WebSocket,
-  socketMessage: ISocketMessage
-) => {
-  const topic = socketMessage.topic
-
-  const subscriber = { topic, socket }
-
-  await setSub(subscriber)
-
+export async function pushPending (socket: IWebSocket, topic: string) {
   const pending = await getPub(topic)
 
   if (pending && pending.length) {
@@ -33,11 +31,25 @@ const SubController = async (
   }
 }
 
-const PubController = async (socketMessage: ISocketMessage) => {
+async function SubController (
+  socket: IWebSocket,
+  socketMessage: ISocketMessage
+) {
+  const topic = socketMessage.topic
+
+  const subscriber = { topic, socket }
+
+  await setSub(subscriber)
+
+  await pushPending(socket, topic)
+}
+
+async function PubController (socketMessage: ISocketMessage) {
   const subscribers = await getSub(socketMessage.topic)
 
-  // send push notifications
-  await pushNotification(socketMessage.topic)
+  if (!socketMessage.silent) {
+    await pushNotification(socketMessage.topic)
+  }
 
   if (subscribers.length) {
     await Promise.all(
@@ -50,35 +62,38 @@ const PubController = async (socketMessage: ISocketMessage) => {
   }
 }
 
-export default async (socket: WebSocket, data: WebSocket.Data) => {
+export default async (socket: IWebSocket, data: WebSocketData) => {
   const message: string = String(data)
+  if (!message || !message.trim()) {
+    return
+  }
 
-  if (message) {
-    if (message === 'ping') {
-      if (socket.readyState === 1) {
-        socket.send('pong')
-      }
-    } else {
-      let socketMessage: ISocketMessage
+  log('incoming', message)
 
-      try {
-        socketMessage = JSON.parse(message)
+  try {
+    let socketMessage: ISocketMessage | null = null
 
-        console.log('IN  =>', socketMessage)
-
-        switch (socketMessage.type) {
-          case 'sub':
-            await SubController(socket, socketMessage)
-            break
-          case 'pub':
-            await PubController(socketMessage)
-            break
-          default:
-            break
-        }
-      } catch (e) {
-        console.error(e)
-      }
+    try {
+      socketMessage = JSON.parse(message)
+    } catch (e) {
+      // do nothing
     }
+
+    if (!socketMessage) {
+      return
+    }
+
+    switch (socketMessage.type) {
+      case 'sub':
+        await SubController(socket, socketMessage)
+        break
+      case 'pub':
+        await PubController(socketMessage)
+        break
+      default:
+        break
+    }
+  } catch (e) {
+    console.error(e)
   }
 }
