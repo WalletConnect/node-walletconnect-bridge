@@ -22,23 +22,13 @@ const getPub = (topic: string) => {
   return matching
 }
 
-export function socketSend (socket: IWebSocket, socketMessage: ISocketMessage) {
+function socketSend (socket: IWebSocket, socketMessage: ISocketMessage) {
   if (socket.readyState === 1) {
     const message = JSON.stringify(socketMessage)
     log('outgoing', message)
     socket.send(message)
   } else {
     setPub(socketMessage)
-  }
-}
-
-export function pushPending (socket: IWebSocket, topic: string) {
-  const pending = getPub(topic)
-
-  if (pending && pending.length) {
-    pending.forEach((pendingMessage: ISocketMessage) =>
-      socketSend(socket, pendingMessage)
-    )
   }
 }
 
@@ -49,7 +39,13 @@ const SubController = (socket: IWebSocket, socketMessage: ISocketMessage) => {
 
   setSub(subscriber)
 
-  pushPending(socket, topic)
+  const pending = getPub(topic)
+
+  if (pending && pending.length) {
+    pending.forEach((pendingMessage: ISocketMessage) =>
+      socketSend(socket, pendingMessage)
+    )
+  }
 }
 
 const PubController = (socketMessage: ISocketMessage) => {
