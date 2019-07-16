@@ -6,28 +6,13 @@ function log (type: string, message: string) {
   console.log({ log: true, type, message })
 }
 
-export async function socketSend (
-  socket: IWebSocket,
-  socketMessage: ISocketMessage
-) {
+async function socketSend (socket: IWebSocket, socketMessage: ISocketMessage) {
   if (socket.readyState === 1) {
     const message = JSON.stringify(socketMessage)
     log('outgoing', message)
     socket.send(message)
   } else {
     await setPub(socketMessage)
-  }
-}
-
-export async function pushPending (socket: IWebSocket, topic: string) {
-  const pending = await getPub(topic)
-
-  if (pending && pending.length) {
-    await Promise.all(
-      pending.map((pendingMessage: ISocketMessage) =>
-        socketSend(socket, pendingMessage)
-      )
-    )
   }
 }
 
@@ -41,7 +26,15 @@ async function SubController (
 
   await setSub(subscriber)
 
-  await pushPending(socket, topic)
+  const pending = await getPub(topic)
+
+  if (pending && pending.length) {
+    await Promise.all(
+      pending.map((pendingMessage: ISocketMessage) =>
+        socketSend(socket, pendingMessage)
+      )
+    )
+  }
 }
 
 async function PubController (socketMessage: ISocketMessage) {
@@ -64,6 +57,7 @@ async function PubController (socketMessage: ISocketMessage) {
 
 export default async (socket: IWebSocket, data: WebSocketData) => {
   const message: string = String(data)
+
   if (!message || !message.trim()) {
     return
   }
