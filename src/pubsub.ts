@@ -3,9 +3,14 @@ import { pushNotification } from './notification'
 
 const subs: ISocketSub[] = []
 let pubs: ISocketMessage[] = []
+let hold: ISocketMessage[] = []
 
 function log (type: string, message: string) {
   console.log({ log: true, type, message })
+}
+
+function isEmpty (arr: any[]) {
+  return !(arr && arr.length)
 }
 
 const setSub = (subscriber: ISocketSub) => subs.push(subscriber)
@@ -22,11 +27,37 @@ const getPub = (topic: string) => {
   return matching
 }
 
-function socketSend (socket: IWebSocket, socketMessage: ISocketMessage) {
+const setHold = (socketMessage: ISocketMessage) => hold.push(socketMessage)
+const getHold = (topic: string) => {
+  const matching = hold.filter(held => held.topic === topic)
+  hold = hold.filter(held => held.topic !== topic)
+  return matching
+}
+
+function updateHold (topic: string) {
+  let oldest = null
+  const matching = getHold(topic)
+  if (!isEmpty(matching)) {
+    oldest = matching.shift()
+    if (!isEmpty(matching)) {
+      matching.forEach((socketMessage: ISocketMessage) =>
+        setHold(socketMessage)
+      )
+    }
+  }
+  return oldest
+}
+
+function socketSendDirect (socket: IWebSocket, socketMessage: ISocketMessage) {
+  const message = JSON.stringify(socketMessage)
+  log('outgoing', message)
+  socket.send(message)
+}
+
+function socketPush (socket: IWebSocket, socketMessage: ISocketMessage) {
   if (socket.readyState === 1) {
-    const message = JSON.stringify(socketMessage)
-    log('outgoing', message)
-    socket.send(message)
+    socketSendDirect(socket, socketMessage)
+    setHold(socketMessage)
   } else {
     setPub(socketMessage)
   }
@@ -41,9 +72,17 @@ const SubController = (socket: IWebSocket, socketMessage: ISocketMessage) => {
 
   const pending = getPub(topic)
 
-  if (pending && pending.length) {
+  if (!isEmpty(pending)) {
     pending.forEach((pendingMessage: ISocketMessage) =>
-      socketSend(socket, pendingMessage)
+      socketPush(socket, pendingMessage)
+    )
+  }
+
+  const held = getHold(topic)
+
+  if (!isEmpty(held)) {
+    held.forEach((heldMessage: ISocketMessage) =>
+      socketSendDirect(socket, heldMessage)
     )
   }
 }
@@ -55,13 +94,17 @@ const PubController = (socketMessage: ISocketMessage) => {
     pushNotification(socketMessage.topic)
   }
 
-  if (subscribers.length) {
+  if (!isEmpty(subscribers)) {
     subscribers.forEach((subscriber: ISocketSub) =>
-      socketSend(subscriber.socket, socketMessage)
+      socketPush(subscriber.socket, socketMessage)
     )
   } else {
     setPub(socketMessage)
   }
+}
+
+const AckController = (socketMessage: ISocketMessage) => {
+  updateHold(socketMessage.topic)
 }
 
 export default (socket: IWebSocket, data: WebSocketData) => {
@@ -91,6 +134,9 @@ export default (socket: IWebSocket, data: WebSocketData) => {
         break
       case 'pub':
         PubController(socketMessage)
+        break
+      case 'ack':
+        AckController(socketMessage)
         break
       default:
         break
