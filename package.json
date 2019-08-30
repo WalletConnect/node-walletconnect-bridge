@@ -23,7 +23,7 @@
   "scripts": {
     "dev": "babel-node --extensions '.ts' src/index.ts",
     "build": "babel ./src --extensions '.ts' --out-dir ./build",
-    "build:docker": "yarn build && docker build -t walletconnect/node-walletconnect-bridge .",
+    "build:docker": "yarn build && docker build -t walletconnect/node-walletconnect-bridge -f ops/Dockerfile .",
     "test": "mocha --require ./babel-polyfill.js test/**/*.spec.ts",
     "start": "node ./build",
     "deploy": "NODE_ENV=production pm2 start ./build --name=bridge"

@@ -1,0 +1,33 @@
+version: '3.7'
+
+
+volumes:
+  redis:
+  certs:
+
+networks:
+  default:
+
+services:
+  nginx:
+    image: 'nginx:1.17-alpine'
+    deploy:
+      mode: global
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - certs:/etc/letsencrypt
+
+  redis:
+    image: 'redis:5-alpine'
+    volumes:
+      - redis:/data
+    depends_on:
+      - nginx
+
+  wallet_connect_server:
+    image: 'walletconnect/proxy-server:master'
+    depends_on:
+      - redis
+
