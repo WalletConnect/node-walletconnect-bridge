@@ -1,9 +1,9 @@
 version: '3.7'
 
-
 volumes:
   redis:
   certs:
+  config:
 
 networks:
   default:
@@ -18,6 +18,9 @@ services:
       - "80:80"
     volumes:
       - certs:/etc/letsencrypt
+      - config:/etc/nginx/sites-enabled/
+    links:
+      - proxy:proxyNodeDocker
 
   redis:
     image: 'redis:5-alpine'
@@ -26,8 +29,10 @@ services:
     depends_on:
       - nginx
 
-  wallet_connect_server:
-    image: 'walletconnect/proxy-server:master'
+  proxy:
+    image: ${WALLET_IMAGE}
     depends_on:
       - redis
+    links:
+      - redis:redisDocker
 
