@@ -1,13 +1,40 @@
-# Licensed under MIT.
-# Copyright (2016) by Kevin van Zonneveld https://twitter.com/kvz
+### Deploy configs
+BRANCH=$(shell git for-each-ref --format='%(objectname) %(refname:short)' refs/heads | awk "/^$$(git rev-parse HEAD)/ {print \$$2}")
+REMOTE="https://github.com/WalletConnect/py-walletconnect-bridge"
+REMOTE_HASH=$(shell git ls-remote $(REMOTE) $(BRANCH) | head -n1 | cut -f1)
+project='walletconnect'
+redisImage='redis:5-alpine'
+nginxImage='nginx:1.17-alpine'
+walletConnectImage='walletconnect/proxy:$(BRANCH)'
+URL=wc.sasquatch.network
 
-define npm_script_targets
-TARGETS := $(shell node -e 'for (var k in require("./package.json").scripts) {console.log(k.replace(/:/g, "-"));}')
-$$(TARGETS):
-	yarn run $(subst -,:,$(MAKECMDGOALS))
+### Makefile internal coordination
+flags=.makeFlags
+.PHONY: all test clean
 
-.PHONY: $$(TARGETS)
-endef
+### Rules
+default:
+	echo "Available tasks: setup, pull, build, run, stop"
 
-$(eval $(call npm_script_targets))
+setup:
+	sed -i -e 's/bridge.mydomain.com/$(URL)/g' ./ops/nginx.conf
+	touch $(flags).$@
 
+pull:
+	docker pull $(redisImage)
+	docker pull $(nginxImage)
+	touch $(flags).$@
+
+build: pull setup
+	  docker build \
+		-t $(walletConnectImage) \
+		--build-arg BRANCH=$(BRANCH) \
+		--build-arg REMOTE_HASH=$(REMOTE_HASH)\
+		-f ops/Dockerfile .
+
+run: build
+	WALLET_IMAGE=$(walletConnectImage) \
+	docker stack deploy -c ops/docker-compose.yml $(project)
+
+stop: 
+	docker stack rm $(project)
