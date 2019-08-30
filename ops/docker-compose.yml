@@ -35,4 +35,6 @@ services:
       - redis
     links:
       - redis:redisDocker
+    env_file:
+      - prod.env
 

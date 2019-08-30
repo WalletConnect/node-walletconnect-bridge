@@ -1,71 +1,63 @@
 import { ISocketMessage, ISocketSub, IWebSocket, WebSocketData } from './types'
 import { pushNotification } from './notification'
-
-const subs: ISocketSub[] = []
-let pubs: ISocketMessage[] = []
+import { setSub, getSub, setPub, getPub } from './keystore'
 
 function log (type: string, message: string) {
   console.log({ log: true, type, message })
 }
 
-const setSub = (subscriber: ISocketSub) => subs.push(subscriber)
-const getSub = (topic: string) =>
-  subs.filter(
-    subscriber =>
-      subscriber.topic === topic && subscriber.socket.readyState === 1
-  )
-
-const setPub = (socketMessage: ISocketMessage) => pubs.push(socketMessage)
-const getPub = (topic: string) => {
-  const matching = pubs.filter(pending => pending.topic === topic)
-  pubs = pubs.filter(pending => pending.topic !== topic)
-  return matching
-}
-
-function socketSend (socket: IWebSocket, socketMessage: ISocketMessage) {
+async function socketSend (socket: IWebSocket, socketMessage: ISocketMessage) {
   if (socket.readyState === 1) {
     const message = JSON.stringify(socketMessage)
     log('outgoing', message)
     socket.send(message)
   } else {
-    setPub(socketMessage)
+    await setPub(socketMessage)
   }
 }
 
-const SubController = (socket: IWebSocket, socketMessage: ISocketMessage) => {
+async function SubController (
+  socket: IWebSocket,
+  socketMessage: ISocketMessage
+) {
   const topic = socketMessage.topic
 
   const subscriber = { topic, socket }
 
-  setSub(subscriber)
+  await setSub(subscriber)
 
-  const pending = getPub(topic)
+  const pending = await getPub(topic)
 
   if (pending && pending.length) {
-    pending.forEach((pendingMessage: ISocketMessage) =>
-      socketSend(socket, pendingMessage)
+    await Promise.all(
+      pending.map((pendingMessage: ISocketMessage) =>
+        socketSend(socket, pendingMessage)
+      )
     )
   }
 }
 
-const PubController = (socketMessage: ISocketMessage) => {
-  const subscribers = getSub(socketMessage.topic)
+async function PubController (socketMessage: ISocketMessage) {
+  const subscribers = await getSub(socketMessage.topic)
 
   if (!socketMessage.silent) {
-    pushNotification(socketMessage.topic)
+    await pushNotification(socketMessage.topic)
   }
 
   if (subscribers.length) {
-    subscribers.forEach((subscriber: ISocketSub) =>
-      socketSend(subscriber.socket, socketMessage)
+    await Promise.all(
+      subscribers.map((subscriber: ISocketSub) =>
+        socketSend(subscriber.socket, socketMessage)
+      )
     )
   } else {
-    setPub(socketMessage)
+    await setPub(socketMessage)
   }
 }
 
-export default (socket: IWebSocket, data: WebSocketData) => {
+export default async (socket: IWebSocket, data: WebSocketData) => {
   const message: string = String(data)
+
   if (!message || !message.trim()) {
     return
   }
@@ -87,10 +79,10 @@ export default (socket: IWebSocket, data: WebSocketData) => {
 
     switch (socketMessage.type) {
       case 'sub':
-        SubController(socket, socketMessage)
+        await SubController(socket, socketMessage)
         break
       case 'pub':
-        PubController(socketMessage)
+        await PubController(socketMessage)
         break
       default:
         break

@@ -1,0 +1,20 @@
+version: '3.7'
+
+networks:
+  default:
+
+services:
+  redis:
+    image: 'redis:5-alpine'
+
+  node:
+    image: ${WALLET_IMAGE}
+    depends_on:
+      - redis
+    volumes:
+      - ../build:/root/build
+    ports:
+      - "5001:5001"
+    environment:
+      NODE_ENV: development
+
