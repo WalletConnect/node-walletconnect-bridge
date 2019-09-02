@@ -11,10 +11,9 @@ services:
     image: ${WALLET_IMAGE}
     depends_on:
       - redis
-    volumes:
-      - ../build:/root/build
     ports:
       - "5001:5001"
     environment:
       NODE_ENV: development
+      REDIS_URL: redis://redis:6379/0
 

@@ -1,5 +1,11 @@
-FROM node:10-alpine
+FROM node:10-slim
 
-COPY build build
+WORKDIR /root
+COPY package.json package-lock.json* ./
+RUN npm install --no-optional && npm cache clean --force
+ENV PATH /root/node_modules/.bin/:$PATH
 
-ENTRYPOINT ["node", "build/"]
+COPY . .
+RUN npm run build
+
+CMD ["node", "/root/build"]
