@@ -31,16 +31,16 @@ pull:
 	touch $(flags)/$@
 
 build: pull setup
-		npm run build
-	  docker build \
+	npm run build
+	docker build \
 		-t $(walletConnectImage) \
 		--build-arg BRANCH=$(BRANCH) \
-		--build-arg REMOTE_HASH=$(REMOTE_HASH)\
+		--build-arg REMOTE_HASH=$(REMOTE_HASH) \
 		-f ops/Dockerfile .
 	touch $(flags)/$@
 
 redis:
-	docker run --name redis -p 6379:6379 redis
+	docker run -p 6379:6379 $(redisImage)
 
 dev: build
 	WALLET_IMAGE=$(walletConnectImage) \
