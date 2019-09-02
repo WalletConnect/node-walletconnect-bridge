@@ -4,9 +4,9 @@ REMOTE="https://github.com/WalletConnect/py-walletconnect-bridge"
 REMOTE_HASH=$(shell git ls-remote $(REMOTE) $(BRANCH) | head -n1 | cut -f1)
 project=walletconnect
 redisImage='redis:5-alpine'
-nginxImage='nginx:1.17-alpine'
+nginxImage='walletconnect/nginx:$(BRANCH)'
 walletConnectImage='walletconnect/proxy:$(BRANCH)'
-URL=wc.sasquatch.network
+BRIDGE_URL=test-bridge.walletconnect.org
 
 ### Makefile internal coordination
 flags=.makeFlags
@@ -21,22 +21,29 @@ default:
 	echo "Available tasks: setup, pull, build, run, stop"
 
 setup:
-	sed -i -e 's/bridge.mydomain.com/$(URL)/g' ./ops/nginx.conf
 	npm install
 	touch $(flags)/$@
 
 pull:
 	docker pull $(redisImage)
-	docker pull $(nginxImage)
 	touch $(flags)/$@
 
-build: pull setup
-	npm run build
+build-node: pull setup
 	docker build \
 		-t $(walletConnectImage) \
 		--build-arg BRANCH=$(BRANCH) \
 		--build-arg REMOTE_HASH=$(REMOTE_HASH) \
-		-f ops/Dockerfile .
+		-f ops/node.Dockerfile .
+	touch $(flags)/$@
+
+build-nginx:
+	docker build \
+		-t $(nginxImage) \
+		--build-arg BRANCH=$(BRANCH) \
+		--build-arg REMOTE_HASH=$(REMOTE_HASH) \
+		-f ops/nginx.Dockerfile .
+
+build: pull setup build-node build-nginx
 	touch $(flags)/$@
 
 redis:
@@ -48,6 +55,8 @@ dev: build
 
 run: build
 	WALLET_IMAGE=$(walletConnectImage) \
+	BRIDGE_URL=$(BRIDGE_URL) \
+	CERTBOT_EMAIL=someemail@walletconnect.org \
 	docker stack deploy -c ops/docker-compose.yml $(project)
 
 stop: 

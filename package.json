@@ -21,8 +21,6 @@
     "ws": "^7.0.0"
   },
   "scripts": {
-    "dev:app": "babel-node --extensions '.ts' src/index.ts",
-    "dev": "concurrently \"npm run dev:redis\" \"npm run dev:app\"",
     "build": "babel ./src --extensions '.ts' --out-dir ./build",
     "test": "mocha --require ./babel-polyfill.js test/**/*.spec.ts",
     "start": "node ./build"
@@ -44,12 +42,10 @@
     "@babel/register": "^7.0.0",
     "@types/axios": "^0.14.0",
     "@types/bluebird": "^3.5.27",
-    "@types/chai": "^4.1.6",
-    "@types/mocha": "^5.2.5",
+    "@types/core-js": "^2.5.2",
     "@types/node": "^12.0.8",
     "@types/redis": "^2.8.13",
     "@types/ws": "^6.0.1",
-    "concurrently": "^4.1.0",
     "core-js": "^3.2.1",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
@@ -57,7 +53,6 @@
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
-    "redis-server": "^1.2.2",
     "tslint": "^5.11.0",
     "tslint-config-standard": "^8.0.1",
     "typescript": "^3.1.3"

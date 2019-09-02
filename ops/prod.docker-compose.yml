@@ -1,0 +1,48 @@
+version: '3.7'
+
+volumes:
+  redis:
+  certs:
+  nginx:
+
+networks:
+  default:
+
+services:
+  nginx:
+    image: 'nginx:1.17-alpine'
+    deploy:
+      mode: global
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - certs:/etc/letsencrypt
+      - nginx:/etc/nginx
+    enviroment:
+      DOMAIN_URL: ${BRIDGE_URL}
+      NODE_ENV: production
+      EMAIL: ${CERTBOT_EMAIL}
+
+  certbot:
+    image: certbot/cerbot
+    depends_on:
+      - nginx
+    volumes:
+      - certs:/etc/letsencrypt
+      - nginx:/etc/nginx
+    enviroment:
+      DOMAIN_URL: ${DOMAIN_URL}
+
+  redis:
+    image: 'redis:5-alpine'
+    volumes:
+      - redis:/data
+
+  node:
+    image: ${WALLET_IMAGE}
+    depends_on:
+      - redis
+    enviroment:
+      NODE_ENV: production
+      REDIS_URL: redis://redis:6379/0
