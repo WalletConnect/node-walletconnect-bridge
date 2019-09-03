@@ -7,10 +7,14 @@ email="${EMAIL:-noreply@gmail.com}"
 node_env="${NODE_ENV:-development}"
 node_docker_name="${NODE_DOCKER_NAME:-node}"
 
-echo "domain=$domain \n
-email=$email \n
-node_env=$node_env \n
-node_docker_name=$node_docker_name"
+echo "
+
+domain=$domain
+email=$email
+node_env=$node_env
+node_docker_name=$node_docker_name
+
+"
 
 # Setup SSL Certs
 letsencrypt=/etc/letsencrypt/live
@@ -57,6 +61,7 @@ function renewcerts {
 
 if [[ "$domain" != "localhost" ]]
 then
+  echo "Forking renewcerts to the background..."
   renewcerts &
 fi
 
