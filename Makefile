@@ -38,6 +38,7 @@ build-nginx:
 		--build-arg BRANCH=$(BRANCH) \
 		--build-arg REMOTE_HASH=$(REMOTE_HASH) \
 		-f ops/nginx.Dockerfile .
+	touch $(flags)/$@
 
 build: pull build-node build-nginx
 	touch $(flags)/$@
@@ -51,9 +52,10 @@ dev: build
 
 run: build
 	WALLET_IMAGE=$(walletConnectImage) \
+	NGINX_IMAGE=$(nginxImage) \
 	BRIDGE_URL=$(BRIDGE_URL) \
-	CERTBOT_EMAIL=someemail@walletconnect.org \
-	docker stack deploy -c ops/docker-compose.yml $(project)
+	CERTBOT_EMAIL=admin@walletconnect.org \
+	docker stack deploy -c ops/prod.docker-compose.yml $(project)
 
 stop: 
 	docker stack rm $(project)

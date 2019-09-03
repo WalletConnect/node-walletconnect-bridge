@@ -1,6 +1,5 @@
 .git
 node_modules
-ops
 LICENSE.md
 README.md
 Makefile

@@ -10,7 +10,12 @@ networks:
 
 services:
   nginx:
-    image: 'nginx:1.17-alpine'
+    image: ${NGINX_IMAGE}
+    environment:
+      DOMAIN_URL: ${BRIDGE_URL}
+      NODE_ENV: production
+      EMAIL: ${CERTBOT_EMAIL}
+      NODE_DOCKER_NAME: node
     deploy:
       mode: global
     ports:
@@ -19,11 +24,6 @@ services:
     volumes:
       - certs:/etc/letsencrypt
       - nginx:/etc/nginx
-    enviroment:
-      DOMAIN_URL: ${BRIDGE_URL}
-      NODE_ENV: production
-      EMAIL: ${CERTBOT_EMAIL}
-      NODE_DOCKER_NAME: node
 
   redis:
     image: 'redis:5-alpine'
@@ -34,6 +34,6 @@ services:
     image: ${WALLET_IMAGE}
     depends_on:
       - redis
-    enviroment:
+    environment:
       NODE_ENV: production
       REDIS_URL: redis://redis:6379/0
