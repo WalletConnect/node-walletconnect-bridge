@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 # Set default variables
 domain="${DOMAIN_URL:-localhost}"
 email="${EMAIL:-noreply@gmail.com}"

@@ -3,7 +3,6 @@ version: '3.7'
 volumes:
   redis:
   certs:
-  nginx:
 
 networks:
   default:
@@ -22,8 +21,7 @@ services:
       - "443:443"
       - "80:80"
     volumes:
-      - certs:/etc/letsencrypt
-      - nginx:/etc/nginx
+      - certs:/etc/certs
 
   redis:
     image: 'redis:5-alpine'
