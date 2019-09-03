@@ -23,16 +23,7 @@ services:
       DOMAIN_URL: ${BRIDGE_URL}
       NODE_ENV: production
       EMAIL: ${CERTBOT_EMAIL}
-
-  certbot:
-    image: certbot/cerbot
-    depends_on:
-      - nginx
-    volumes:
-      - certs:/etc/letsencrypt
-      - nginx:/etc/nginx
-    enviroment:
-      DOMAIN_URL: ${DOMAIN_URL}
+      NODE_DOCKER_NAME: node
 
   redis:
     image: 'redis:5-alpine'

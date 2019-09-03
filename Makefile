@@ -18,17 +18,13 @@ $(shell mkdir -p $(flags))
 
 ### Rules
 default:
-	echo "Available tasks: setup, pull, build, run, stop"
-
-setup:
-	npm install
-	touch $(flags)/$@
+	echo "Available tasks: pull, build, run, stop"
 
 pull:
 	docker pull $(redisImage)
 	touch $(flags)/$@
 
-build-node: pull setup
+build-node: pull
 	docker build \
 		-t $(walletConnectImage) \
 		--build-arg BRANCH=$(BRANCH) \
@@ -43,7 +39,7 @@ build-nginx:
 		--build-arg REMOTE_HASH=$(REMOTE_HASH) \
 		-f ops/nginx.Dockerfile .
 
-build: pull setup build-node build-nginx
+build: pull build-node build-nginx
 	touch $(flags)/$@
 
 redis:
