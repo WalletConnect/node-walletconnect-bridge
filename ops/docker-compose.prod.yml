@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+  nginx:
+    environment:
+      DOMAIN_URL: ${BRIDGE_URL}
+      NODE_ENV: production
+      EMAIL: ${CERTBOT_EMAIL}
+      NODE_DOCKER_NAME: node
+
+  node:
+    environment:
+      NODE_ENV: production

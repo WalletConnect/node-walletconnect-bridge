@@ -51,12 +51,13 @@ dev: build
 	NGINX_IMAGE=$(nginxImage) \
 	docker stack deploy -c ops/dev.docker-compose.yml dev-$(project)
 
-run: build
+deploy-prod: build
 	WALLET_IMAGE=$(walletConnectImage) \
 	NGINX_IMAGE=$(nginxImage) \
 	BRIDGE_URL=$(BRIDGE_URL) \
 	CERTBOT_EMAIL=admin@walletconnect.org \
-	docker stack deploy -c ops/prod.docker-compose.yml $(project)
+	docker stack deploy -c ops/docker-compose.yml \
+	-c ops/docker-compose.prod.yml $(project)
 
 stop: 
 	docker stack rm $(project)
