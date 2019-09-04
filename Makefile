@@ -48,6 +48,7 @@ redis:
 
 dev: build
 	WALLET_IMAGE=$(walletConnectImage) \
+	NGINX_IMAGE=$(nginxImage) \
 	docker stack deploy -c ops/dev.docker-compose.yml dev-$(project)
 
 run: build

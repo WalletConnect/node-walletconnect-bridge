@@ -1,11 +1,11 @@
 #!/bin/bash
-set -e
 
 # Set default variables
 domain="${DOMAIN_URL:-localhost}"
 email="${EMAIL:-noreply@gmail.com}"
 node_env="${NODE_ENV:-development}"
 node_docker_name="${NODE_DOCKER_NAME:-node}"
+node_port="${NODE_PORT-5001}"
 
 echo "
 
@@ -13,6 +13,7 @@ domain=$domain
 email=$email
 node_env=$node_env
 node_docker_name=$node_docker_name
+node_port=$node_port
 
 "
 
@@ -41,8 +42,9 @@ ln -sf $letsencrypt/$domain/privkey.pem /etc/certs/privkey.pem
 ln -sf $letsencrypt/$domain/fullchain.pem /etc/certs/fullchain.pem
 
 # Hack way to implement variables in the nginx.conf file
-sed -i 's/$DOMAIN_URL/'"$domain"'/' /etc/nginx/nginx.conf
+sed -i 's|$DOMAIN_URL|'"$domain"'|' /etc/nginx/nginx.conf
 sed -i 's|$NODE_DOCKER_NAME|'"$node_docker_name"'|' /etc/nginx/nginx.conf
+sed -i 's|$NODE_PORT|'"$node_port"'|' /etc/nginx/nginx.conf
 
 # periodically fork off & see if our certs need to be renewed
 function renewcerts {

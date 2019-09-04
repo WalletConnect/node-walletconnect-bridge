@@ -1,7 +1,8 @@
 FROM node:10-slim
 
 WORKDIR /root
-COPY package.json package-lock.json .
+COPY package.json ./
+COPY package-lock.json ./
 RUN npm install --no-optional && npm cache clean --force
 ENV PATH /root/node_modules/.bin/:$PATH
 
