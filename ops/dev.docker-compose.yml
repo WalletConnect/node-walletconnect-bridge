@@ -17,6 +17,8 @@ services:
       - "80:80"
     volumes:
       - certs:/etc/certs
+    depends_on:
+      - node
 
   redis:
     image: 'redis:5-alpine'
@@ -27,8 +29,6 @@ services:
     image: ${WALLET_IMAGE}
     depends_on:
       - redis
-    ports:
-      - "5001:5001"
     environment:
       NODE_ENV: development
       REDIS_URL: redis://redis:6379/0
