@@ -39,7 +39,7 @@ pull:
 setup:
 	@read -p 'Bridge URL domain: ' bridge; \
 	echo "BRIDGE_URL="$$bridge > config
-	@read -p 'Email for SSL certificate: ' email; \
+	@read -p 'Email for SSL certificate (default noreply@gmail.com): ' email; \
 	echo "CERTBOT_EMAIL="$$email >> config
 	@touch $(flags)/$@
 
