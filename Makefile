@@ -62,6 +62,8 @@ dev: build
 	-c ops/docker-compose.yml \
 	-c ops/docker-compose.dev.yml \
 	dev_$(project)
+	@echo "Done with deoploying... attaching to nginx container logs..."
+	docker service logs -f --raw $(project)_nginx
 
 deploy-prod: setup build
 	WALLET_IMAGE=$(walletConnectImage) \
@@ -70,11 +72,19 @@ deploy-prod: setup build
 	CERTBOT_EMAIL=$(CERTBOT_EMAIL) \
 	docker stack deploy -c ops/docker-compose.yml \
 	-c ops/docker-compose.prod.yml $(project)
+	@echo "Done with deoploying... attaching to nginx container logs..."
 	docker service logs -f --raw $(project)_nginx
 
 stop: 
 	docker stack rm $(project)
 	docker stack rm dev_$(project)
+
+upgrade-prod: stop
+	git pull
+	# This waits for the network to go down before restarting a new
+	# deploy
+	while [[ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=$(project)`" ]]; do echo -n '.' && sleep 3; done
+	$(MAKE) deploy-prod
 
 reset:
 	rm -rf .makeFlags
