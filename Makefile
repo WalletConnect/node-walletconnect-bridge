@@ -7,7 +7,8 @@ redisImage='redis:5-alpine'
 nginxImage='walletconnect/nginx:$(BRANCH)'
 walletConnectImage='walletconnect/proxy:$(BRANCH)'
 
-BRIDGE_URL ?= test-bridge.walletconnect.org
+BRIDGE_URL=$(shell cat config | grep BRIDGE_URL | cut -f2 -d=)
+CERTBOT_EMAIL=$(shell cat config | grep CERTBOT_EMAIL | cut -f2 -d=)
 
 ### Makefile internal coordination
 flags=.makeFlags
@@ -23,7 +24,14 @@ default:
 
 pull:
 	docker pull $(redisImage)
-	touch $(flags)/$@
+	@touch $(flags)/$@
+
+setup:
+	@read -p 'Bridge URL domain: ' bridge; \
+	echo "export BRIDGE_URL="$$bridge > config
+	@read -p 'Email for SSL certificate: ' email; \
+	echo "export CERTBOT_EMAIL="$$email >> config
+	@touch $(flags)/$@
 
 build-node: pull
 	docker build \
@@ -31,7 +39,7 @@ build-node: pull
 		--build-arg BRANCH=$(BRANCH) \
 		--build-arg REMOTE_HASH=$(REMOTE_HASH) \
 		-f ops/node.Dockerfile .
-	touch $(flags)/$@
+	@touch $(flags)/$@
 
 build-nginx: pull
 	docker build \
@@ -39,10 +47,10 @@ build-nginx: pull
 		--build-arg BRANCH=$(BRANCH) \
 		--build-arg REMOTE_HASH=$(REMOTE_HASH) \
 		-f ops/nginx.Dockerfile .
-	touch $(flags)/$@
+	@touch $(flags)/$@
 
 build: pull build-node build-nginx
-	touch $(flags)/$@
+	@touch $(flags)/$@
 
 redis:
 	docker run -p 6379:6379 $(redisImage)
@@ -55,18 +63,21 @@ dev: build
 	-c ops/docker-compose.dev.yml \
 	dev_$(project)
 
-deploy-prod: build
+deploy-prod: setup build
 	WALLET_IMAGE=$(walletConnectImage) \
 	NGINX_IMAGE=$(nginxImage) \
 	BRIDGE_URL=$(BRIDGE_URL) \
-	CERTBOT_EMAIL=admin@walletconnect.org \
+	CERTBOT_EMAIL=$(CERTBOT_EMAIL) \
 	docker stack deploy -c ops/docker-compose.yml \
 	-c ops/docker-compose.prod.yml $(project)
+	docker service logs -f --raw $(project)_nginx
 
 stop: 
 	docker stack rm $(project)
 	docker stack rm dev_$(project)
 
-clean:
+reset:
 	rm -rf .makeFlags
-	git checkout ops/nginx.conf
+
+clean:
+	rm -rf .makeFlags/build*
