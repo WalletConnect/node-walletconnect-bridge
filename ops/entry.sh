@@ -37,7 +37,6 @@ then
   if [[ ! $? -eq 0 ]] 
   then
     echo "ERROR"
-    echo $?
     echo "Sleeping to not piss off certbot"
     sleep 9999 # FREEZE! Don't pester eff & get throttled
   fi
