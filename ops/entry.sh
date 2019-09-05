@@ -5,7 +5,7 @@ domain="${DOMAIN_URL:-localhost}"
 email="${EMAIL:-noreply@gmail.com}"
 node_env="${NODE_ENV:-development}"
 node_docker_name="${NODE_DOCKER_NAME:-node}"
-node_port="${NODE_PORT-5001}"
+node_port="${NODE_PORT:-5001}"
 
 echo "
 
@@ -34,7 +34,13 @@ if [[ ! -f "$letsencrypt/$domain/privkey.pem" ]]
 then
   echo "Couldn't find certs for $domain, using certbot to initialize those now.."
   certbot certonly --standalone -m $email --agree-tos --no-eff-email -d $domain -n
-  [[ $? -eq 0 ]] || sleep 9999 # FREEZE! Don't pester eff & get throttled
+  if [[ ! $? -eq 0 ]] 
+  then
+    echo "ERROR"
+    echo $?
+    echo "Sleeping to not piss off certbot"
+    sleep 9999 # FREEZE! Don't pester eff & get throttled
+  fi
 fi
 
 echo "Using certs for $domain"

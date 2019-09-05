@@ -1,12 +1,13 @@
 ### Deploy configs
 BRANCH=$(shell git for-each-ref --format='%(objectname) %(refname:short)' refs/heads | awk "/^$$(git rev-parse HEAD)/ {print \$$2}")
-REMOTE="https://github.com/WalletConnect/py-walletconnect-bridge"
+REMOTE="https://github.com/WalletConnect/node-walletconnect-bridge"
 REMOTE_HASH=$(shell git ls-remote $(REMOTE) $(BRANCH) | head -n1 | cut -f1)
 project=walletconnect
 redisImage='redis:5-alpine'
 nginxImage='walletconnect/nginx:$(BRANCH)'
 walletConnectImage='walletconnect/proxy:$(BRANCH)'
-BRIDGE_URL=test-bridge.walletconnect.org
+
+BRIDGE_URL ?= test-bridge.walletconnect.org
 
 ### Makefile internal coordination
 flags=.makeFlags
@@ -14,11 +15,11 @@ VPATH=$(flags)
 
 $(shell mkdir -p $(flags))
 
-.PHONY: all clean
+.PHONY: all clean default
 
 ### Rules
 default:
-	echo "Available tasks: pull, build, run, stop"
+	echo "Available tasks: pull, build, dev, deploy-prod, stop, clean"
 
 pull:
 	docker pull $(redisImage)
@@ -32,7 +33,7 @@ build-node: pull
 		-f ops/node.Dockerfile .
 	touch $(flags)/$@
 
-build-nginx:
+build-nginx: pull
 	docker build \
 		-t $(nginxImage) \
 		--build-arg BRANCH=$(BRANCH) \
@@ -49,7 +50,10 @@ redis:
 dev: build
 	WALLET_IMAGE=$(walletConnectImage) \
 	NGINX_IMAGE=$(nginxImage) \
-	docker stack deploy -c ops/dev.docker-compose.yml dev-$(project)
+	docker stack deploy \
+	-c ops/docker-compose.yml \
+	-c ops/docker-compose.dev.yml \
+	dev_$(project)
 
 deploy-prod: build
 	WALLET_IMAGE=$(walletConnectImage) \
@@ -61,7 +65,7 @@ deploy-prod: build
 
 stop: 
 	docker stack rm $(project)
-	docker stack rm dev-$(project)
+	docker stack rm dev_$(project)
 
 clean:
 	rm -rf .makeFlags

@@ -4,50 +4,49 @@ Bridge Server for relaying WalletConnect connections
 
 ## Development
 
-```bash
-yarn dev
+Local dev work is using local self signed certificates withing the docker environment.
+
+Your Walletconnect enabled app needs to be on the same local network.
+
+```
+make dev # ports 80, 443, 5001, 6379 will be exposed locally
 ```
 
 ## Production
 
-### Using NPM
-
-1. Build
-
-```bash
-yarn build
-```
-
-2. Production
-
-```bash
-yarn start
-```
-
-3. Server accessible from host:
-
-```bash
-$ curl http://localhost:5000/hello
-> Hello World, this is WalletConnect v1.0.0-beta
-```
-
 ### Using Docker
 
-1. Build the container with:
+#### Setting up docker
+
+Depending on your system you will need to have docker swarm enabled:
+
+- docker
 
 ```bash
-make build-docker
+docker swarm init
+```
+
+### Deploying
+
+1. Build the containers with:
+
+```bash
+make build
 ```
 
 2. Run the container with:
 
 ```bash
-docker run -p 5000:5000 walletconnect/node-walletconnect-bridge
+# Using default BRIDGE_URL of `test-bridge.walletconnect.org`
+make deploy-prod 
+
+# Using custom bridge url
+BRIDGE_URL=custom.bridge.com make deploy-prod
 ```
 
-3. Server accessible from host:
+3. Server accessible from domain:
 
 ```bash
-$ curl http://localhost:5000/hello
+$ curl https://test-bridge.walletconnect.org/hello
 > Hello World, this is WalletConnect v1.0.0-beta
 ```
