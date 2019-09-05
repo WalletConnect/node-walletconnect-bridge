@@ -20,16 +20,17 @@ $(shell mkdir -p $(flags))
 
 ### Rules
 default:
-	@echo "Available tasks: "
-	@echo "pull: pulls docker images"
-	@echo "setup: configures domain an certbot email"
-	@echo "build: builds docker images"
-	@echo "dev: runs local docker stack with open ports"
-	@echo "deploy-prod: deploys to production"
-	@echo "stop: stops all walletconnect docker stacks"
-	@echo "upgrade-prod: stops current docker stack. Pulls from remote git. Runs deploys production using deploy-prod make rule"
-	@echo "clean: cleans current docker build"
-	@echo "reset: reset local config"
+	@echo
+	@echo "Available make rules: "
+	@echo "pull:          pulls docker images"
+	@echo "setup:         configures domain an certbot email"
+	@echo "build:         builds docker images"
+	@echo "dev:           runs local docker stack with open ports"
+	@echo "deploy-prod:   deploys to production"
+	@echo "stop:          stops all walletconnect docker stacks"
+	@echo "upgrade-prod:  stops current docker stack. Pulls from remote git. Runs deploys production using deploy-prod rule"
+	@echo "clean:         cleans current docker build"
+	@echo "reset:         reset local config"
 
 pull:
 	docker pull $(redisImage)
@@ -89,8 +90,6 @@ stop:
 
 upgrade-prod: stop
 	git pull
-	# This waits for the network to go down before restarting a new
-	# deploy
 	$(MAKE) deploy-prod
 
 reset:
