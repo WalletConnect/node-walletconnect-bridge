@@ -18,35 +18,25 @@ make dev # ports 80, 443, 5001, 6379 will be exposed locally
 
 #### Setting up docker
 
-Depending on your system you will need to have docker swarm enabled:
-
+Dependencies:
 - docker
+- make
 
+You will need to have docker swarm enabled:
 ```bash
 docker swarm init
 ```
 
 ### Deploying
 
-1. Build the containers with:
+Run the following command and fill in the prompts:
 
 ```bash
-make build
+make deploy-prod
 ```
 
-2. Run the container with:
+### Upgrading
 
 ```bash
-# Using default BRIDGE_URL of `test-bridge.walletconnect.org`
-make deploy-prod 
-
-# Using custom bridge url
-BRIDGE_URL=custom.bridge.com make deploy-prod
-```
-
-3. Server accessible from domain:
-
-```bash
-$ curl https://test-bridge.walletconnect.org/hello
-> Hello World, this is WalletConnect v1.0.0-beta
+make upgrade-prod
 ```
