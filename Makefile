@@ -28,9 +28,9 @@ pull:
 
 setup:
 	@read -p 'Bridge URL domain: ' bridge; \
-	echo "export BRIDGE_URL="$$bridge > config
+	echo "BRIDGE_URL="$$bridge > config
 	@read -p 'Email for SSL certificate: ' email; \
-	echo "export CERTBOT_EMAIL="$$email >> config
+	echo "CERTBOT_EMAIL="$$email >> config
 	@touch $(flags)/$@
 
 build-node: pull
