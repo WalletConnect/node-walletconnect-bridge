@@ -20,7 +20,16 @@ $(shell mkdir -p $(flags))
 
 ### Rules
 default:
-	echo "Available tasks: pull, build, dev, deploy-prod, stop, clean"
+	@echo "Available tasks: "
+	@echo "pull: pulls docker images"
+	@echo "setup: configures domain an certbot email"
+	@echo "build: builds docker images"
+	@echo "dev: runs local docker stack with open ports"
+	@echo "deploy-prod: deploys to production"
+	@echo "stop: stops all walletconnect docker stacks"
+	@echo "upgrade-prod: stops current docker stack. Pulls from remote git. Runs deploys production using deploy-prod make rule"
+	@echo "clean: cleans current docker build"
+	@echo "reset: reset local config"
 
 pull:
 	docker pull $(redisImage)
@@ -52,9 +61,6 @@ build-nginx: pull
 build: pull build-node build-nginx
 	@touch $(flags)/$@
 
-redis:
-	docker run -p 6379:6379 $(redisImage)
-
 dev: build
 	WALLET_IMAGE=$(walletConnectImage) \
 	NGINX_IMAGE=$(nginxImage) \
@@ -78,16 +84,18 @@ deploy-prod: setup build
 stop: 
 	docker stack rm $(project)
 	docker stack rm dev_$(project)
+	while [[ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=$(project)`" ]]; do echo -n '.' && sleep 3; done
+	while [[ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=dev_$(project)`" ]]; do echo -n '.' && sleep 3; done
 
 upgrade-prod: stop
 	git pull
 	# This waits for the network to go down before restarting a new
 	# deploy
-	while [[ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=$(project)`" ]]; do echo -n '.' && sleep 3; done
 	$(MAKE) deploy-prod
 
 reset:
 	rm -rf .makeFlags
+	rm -f config
 
 clean:
 	rm -rf .makeFlags/build*
