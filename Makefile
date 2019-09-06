@@ -72,7 +72,7 @@ dev: build
 	@echo "Done with deoploying... attaching to nginx container logs..."
 	docker service logs -f --raw $(project)_nginx
 
-deploy-prod: setup build
+deploy: setup build
 	WALLET_IMAGE=$(walletConnectImage) \
 	NGINX_IMAGE=$(nginxImage) \
 	BRIDGE_URL=$(BRIDGE_URL) \
@@ -88,7 +88,7 @@ stop:
 	while [[ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=$(project)`" ]]; do echo -n '.' && sleep 3; done
 	while [[ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=dev_$(project)`" ]]; do echo -n '.' && sleep 3; done
 
-upgrade-prod: stop
+upgrade: stop
 	git pull
 	$(MAKE) deploy-prod
 
