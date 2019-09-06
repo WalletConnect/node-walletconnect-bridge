@@ -26,9 +26,9 @@ default:
 	@echo "setup:         configures domain an certbot email"
 	@echo "build:         builds docker images"
 	@echo "dev:           runs local docker stack with open ports"
-	@echo "deploy-prod:   deploys to production"
+	@echo "deploy:   deploys to production"
 	@echo "stop:          stops all walletconnect docker stacks"
-	@echo "upgrade-prod:  stops current docker stack. Pulls from remote git. Runs deploys production using deploy-prod rule"
+	@echo "upgrade:  stops current docker stack. Pulls from remote git. Runs deploys production using deploy rule"
 	@echo "clean:         cleans current docker build"
 	@echo "reset:         reset local config"
 
@@ -69,8 +69,6 @@ dev: build
 	-c ops/docker-compose.yml \
 	-c ops/docker-compose.dev.yml \
 	dev_$(project)
-	@echo "Done with deoploying... attaching to nginx container logs..."
-	docker service logs -f --raw $(project)_nginx
 
 deploy: setup build
 	WALLET_IMAGE=$(walletConnectImage) \
@@ -79,8 +77,6 @@ deploy: setup build
 	CERTBOT_EMAIL=$(CERTBOT_EMAIL) \
 	docker stack deploy -c ops/docker-compose.yml \
 	-c ops/docker-compose.prod.yml $(project)
-	@echo "Done with deoploying... attaching to nginx container logs..."
-	docker service logs -f --raw $(project)_nginx
 
 stop: 
 	docker stack rm $(project)
@@ -90,7 +86,7 @@ stop:
 
 upgrade: stop
 	git pull
-	$(MAKE) deploy-prod
+	$(MAKE) deploy
 
 reset:
 	rm -rf .makeFlags
