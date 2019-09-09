@@ -46,8 +46,16 @@ Email for SSL certificate (default noreply@gmail.com):
 
 This will upgrade your current bridge with minimal downtime. 
 
-⚠️ ATTENTION: This will run `git pull` in your repo ⚠️
+⚠️ ATTENTION: This will run `git fetch && git merge origin/master` in your repo ⚠️
 
 ```bash
 make upgrade
+```
+
+### Monitoring 📜
+
+This stack deploys 3 containers one of redis, nginx and node.js. You can follow the logs of the nginx container by running the following command:
+
+```
+docker service logs --raw -f walletconnect_nginx
 ```

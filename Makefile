@@ -35,6 +35,8 @@ default:
 pull:
 	docker pull $(redisImage)
 	@touch $(flags)/$@
+	@echo "MAKE: Done with $@"
+	@echo
 
 setup:
 	@read -p 'Bridge URL domain: ' bridge; \
@@ -42,6 +44,8 @@ setup:
 	@read -p 'Email for SSL certificate (default noreply@gmail.com): ' email; \
 	echo "CERTBOT_EMAIL="$$email >> config
 	@touch $(flags)/$@
+	@echo "MAKE: Done with $@"
+	@echo
 
 build-node: pull
 	docker build \
@@ -50,6 +54,8 @@ build-node: pull
 		--build-arg REMOTE_HASH=$(REMOTE_HASH) \
 		-f ops/node.Dockerfile .
 	@touch $(flags)/$@
+	@echo "MAKE: Done with $@"
+	@echo
 
 build-nginx: pull
 	docker build \
@@ -58,9 +64,13 @@ build-nginx: pull
 		--build-arg REMOTE_HASH=$(REMOTE_HASH) \
 		-f ops/nginx.Dockerfile .
 	@touch $(flags)/$@
+	@echo  "MAKE: Done with $@"
+	@echo
 
 build: pull build-node build-nginx
 	@touch $(flags)/$@
+	@echo  "MAKE: Done with $@"
+	@echo
 
 dev: build
 	WALLET_IMAGE=$(walletConnectImage) \
@@ -69,6 +79,8 @@ dev: build
 	-c ops/docker-compose.yml \
 	-c ops/docker-compose.dev.yml \
 	dev_$(project)
+	@echo  "MAKE: Done with $@"
+	@echo
 
 deploy: setup build
 	WALLET_IMAGE=$(walletConnectImage) \
@@ -77,21 +89,31 @@ deploy: setup build
 	CERTBOT_EMAIL=$(CERTBOT_EMAIL) \
 	docker stack deploy -c ops/docker-compose.yml \
 	-c ops/docker-compose.prod.yml $(project)
+	@echo  "MAKE: Done with $@"
+	@echo
 
 stop: 
 	docker stack rm $(project)
 	docker stack rm dev_$(project)
-	while [[ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=$(project)`" ]]; do echo -n '.' && sleep 3; done
-	while [[ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=dev_$(project)`" ]]; do echo -n '.' && sleep 3; done
+	while [ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=$(project)`" ]; do echo -n '.' && sleep 3; done
+	while [ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=dev_$(project)`" ]; do echo -n '.' && sleep 3; done
+	@echo  "MAKE: Done with $@"
+	@echo
 
 upgrade: stop
-	git fetch origin
-	git merge origin/master
+	git fetch origin $(BRANCH)
+	git merge origin/$(BRANCH)
 	$(MAKE) deploy
+	@echo  "MAKE: Done with $@"
+	@echo
 
 reset:
 	rm -rf .makeFlags
 	rm -f config
+	@echo  "MAKE: Done with $@"
+	@echo
 
 clean:
 	rm -rf .makeFlags/build*
+	@echo  "MAKE: Done with $@"
+	@echo
