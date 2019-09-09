@@ -26,9 +26,9 @@ default:
 	@echo "setup:         configures domain an certbot email"
 	@echo "build:         builds docker images"
 	@echo "dev:           runs local docker stack with open ports"
-	@echo "deploy:   deploys to production"
+	@echo "deploy:        deploys to production"
 	@echo "stop:          stops all walletconnect docker stacks"
-	@echo "upgrade:  stops current docker stack. Pulls from remote git. Runs deploys production using deploy rule"
+	@echo "upgrade:       stops current docker stack. Pulls from remote git. Runs deploys production using deploy rule"
 	@echo "clean:         cleans current docker build"
 	@echo "reset:         reset local config"
 
@@ -85,7 +85,8 @@ stop:
 	while [[ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=dev_$(project)`" ]]; do echo -n '.' && sleep 3; done
 
 upgrade: stop
-	git pull
+	git fetch origin
+	git merge origin/master
 	$(MAKE) deploy
 
 reset:
