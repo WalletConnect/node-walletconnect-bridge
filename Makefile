@@ -95,8 +95,9 @@ deploy: setup build
 stop: 
 	docker stack rm $(project)
 	docker stack rm dev_$(project)
-	while [ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=$(project)`" ]; do echo -n '.' && sleep 3; done
-	while [ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=dev_$(project)`" ]; do echo -n '.' && sleep 3; done
+	while [ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=$(project)`" ]; do echo -n '.' && sleep 1; done
+	@echo
+	while [ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=dev_$(project)`" ]; do echo -n '.' && sleep 1; done
 	@echo  "MAKE: Done with $@"
 	@echo
 
