@@ -1,53 +1,61 @@
-# WalletConnect Bridge Server
+# WalletConnect Bridge Server ⏮️🖥️⏭️
 
 Bridge Server for relaying WalletConnect connections
 
-## Development
+## Development 🧪
 
-```bash
-yarn dev
+Local dev work is using local self signed certificates withing the docker environment.
+
+Your Walletconnect enabled app needs to be on the same local network.
+
+```
+make dev # ports 80, 443, 5001, 6379 will be exposed locally
 ```
 
-## Production
+## Production 🗜️
 
-### Using NPM
+#### Setting up docker 🎚️
 
-1. Build
+Dependencies:
+- git
+- docker
+- make
+
+You will need to have docker swarm enabled:
 
 ```bash
-yarn build
+docker swarm init
+# If you get the following error: `could not chose an IP address to advertise...`. You can do the following:
+docker swarm init --advertise-addr `curl -s ipecho.net/plain`
 ```
 
-2. Production
+### Deploying 🚀
+
+Run the following command and fill in the prompts:
 
 ```bash
-yarn start
+git clone https://github.com/WalletConnect/node-walletconnect-bridge
+cd node-walletconnect-bridge
+make deploy
+Bridge URL domain: <your bridge domain>
+Email for SSL certificate (default noreply@gmail.com):
 ```
 
-3. Server accessible from host:
+
+### Upgrading ⏫
+
+This will upgrade your current bridge with minimal downtime. 
+
+⚠️ ATTENTION: This will run `git fetch && git merge origin/master` in your repo ⚠️
 
 ```bash
-$ curl http://localhost:5000/hello
-> Hello World, this is WalletConnect v1.0.0-beta
+make upgrade
 ```
 
-### Using Docker
+### Monitoring 📜
 
-1. Build the container with:
+This stack deploys 3 containers one of redis, nginx and node.js. You can follow the logs of the nginx container by running the following command:
 
-```bash
-make build-docker
 ```
-
-2. Run the container with:
-
-```bash
-docker run -p 5000:5000 walletconnect/node-walletconnect-bridge
-```
-
-3. Server accessible from host:
-
-```bash
-$ curl http://localhost:5000/hello
-> Hello World, this is WalletConnect v1.0.0-beta
+docker service logs --raw -f walletconnect_nginx
 ```

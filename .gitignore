@@ -44,3 +44,6 @@ dist
 build
 
 .DS_Store
+
+.makeFlags*
+config
