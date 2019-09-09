@@ -17,6 +17,7 @@ make dev # ports 80, 443, 5001, 6379 will be exposed locally
 #### Setting up docker 🎚️
 
 Dependencies:
+- git
 - docker
 - make
 
@@ -24,6 +25,8 @@ You will need to have docker swarm enabled:
 
 ```bash
 docker swarm init
+# If you get the following error: `could not chose an IP address to advertise...`. You can do the following:
+docker swarm init --advertise-addr `curl -s ipecho.net/plain`
 ```
 
 ### Deploying 🚀
@@ -31,6 +34,8 @@ docker swarm init
 Run the following command and fill in the prompts:
 
 ```bash
+git clone https://github.com/WalletConnect/node-walletconnect-bridge
+cd node-walletconnect-bridge
 make deploy
 Bridge URL domain: <your bridge domain>
 Email for SSL certificate (default noreply@gmail.com):
