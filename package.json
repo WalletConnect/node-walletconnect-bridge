@@ -15,7 +15,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "babel-polyfill": "^6.26.0",
-    "core-js": "^2.6.5",
+    "core-js": "^3.6.4",
     "fastify": "^1.13.4",
     "fastify-helmet": "^3.0.0",
     "ws": "^6.1.2"
