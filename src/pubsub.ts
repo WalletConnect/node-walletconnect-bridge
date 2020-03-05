@@ -1,101 +1,94 @@
-import { ISocketMessage, ISocketSub, IWebSocket, WebSocketData } from './types'
-import { pushNotification } from './notification'
+import { ISocketMessage, ISocketSub, IWebSocket, WebSocketData } from "./types";
+import { pushNotification } from "./notification";
 
-const subs: ISocketSub[] = []
-let pubs: ISocketMessage[] = []
+const subs: ISocketSub[] = [];
+let pubs: ISocketMessage[] = [];
 
-function log (type: string, message: string) {
-  console.log({ log: true, type, message })
+function log(type: string, message: string) {
+  console.log({ log: true, type, message });
 }
 
-const setSub = (subscriber: ISocketSub) => subs.push(subscriber)
+const setSub = (subscriber: ISocketSub) => subs.push(subscriber);
 const getSub = (topic: string) =>
-  subs.filter(
-    subscriber =>
-      subscriber.topic === topic && subscriber.socket.readyState === 1
-  )
+  subs.filter(subscriber => subscriber.topic === topic && subscriber.socket.readyState === 1);
 
-const setPub = (socketMessage: ISocketMessage) => pubs.push(socketMessage)
+const setPub = (socketMessage: ISocketMessage) => pubs.push(socketMessage);
 const getPub = (topic: string) => {
-  const matching = pubs.filter(pending => pending.topic === topic)
-  pubs = pubs.filter(pending => pending.topic !== topic)
-  return matching
-}
+  const matching = pubs.filter(pending => pending.topic === topic);
+  pubs = pubs.filter(pending => pending.topic !== topic);
+  return matching;
+};
 
-function socketSend (socket: IWebSocket, socketMessage: ISocketMessage) {
+function socketSend(socket: IWebSocket, socketMessage: ISocketMessage) {
   if (socket.readyState === 1) {
-    const message = JSON.stringify(socketMessage)
-    log('outgoing', message)
-    socket.send(message)
+    const message = JSON.stringify(socketMessage);
+    log("outgoing", message);
+    socket.send(message);
   } else {
-    setPub(socketMessage)
+    setPub(socketMessage);
   }
 }
 
 const SubController = (socket: IWebSocket, socketMessage: ISocketMessage) => {
-  const topic = socketMessage.topic
+  const topic = socketMessage.topic;
 
-  const subscriber = { topic, socket }
+  const subscriber = { topic, socket };
 
-  setSub(subscriber)
+  setSub(subscriber);
 
-  const pending = getPub(topic)
+  const pending = getPub(topic);
 
   if (pending && pending.length) {
-    pending.forEach((pendingMessage: ISocketMessage) =>
-      socketSend(socket, pendingMessage)
-    )
+    pending.forEach((pendingMessage: ISocketMessage) => socketSend(socket, pendingMessage));
   }
-}
+};
 
 const PubController = (socketMessage: ISocketMessage) => {
-  const subscribers = getSub(socketMessage.topic)
+  const subscribers = getSub(socketMessage.topic);
 
   if (!socketMessage.silent) {
-    pushNotification(socketMessage.topic)
+    pushNotification(socketMessage.topic);
   }
 
   if (subscribers.length) {
-    subscribers.forEach((subscriber: ISocketSub) =>
-      socketSend(subscriber.socket, socketMessage)
-    )
+    subscribers.forEach((subscriber: ISocketSub) => socketSend(subscriber.socket, socketMessage));
   } else {
-    setPub(socketMessage)
+    setPub(socketMessage);
   }
-}
+};
 
 export default (socket: IWebSocket, data: WebSocketData) => {
-  const message: string = String(data)
+  const message = String(data);
   if (!message || !message.trim()) {
-    return
+    return;
   }
 
-  log('incoming', message)
+  log("incoming", message);
 
   try {
-    let socketMessage: ISocketMessage | null = null
+    let socketMessage: ISocketMessage | null = null;
 
     try {
-      socketMessage = JSON.parse(message)
+      socketMessage = JSON.parse(message);
     } catch (e) {
       // do nothing
     }
 
     if (!socketMessage) {
-      return
+      return;
     }
 
     switch (socketMessage.type) {
-      case 'sub':
-        SubController(socket, socketMessage)
-        break
-      case 'pub':
-        PubController(socketMessage)
-        break
+      case "sub":
+        SubController(socket, socketMessage);
+        break;
+      case "pub":
+        PubController(socketMessage);
+        break;
       default:
-        break
+        break;
     }
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
-}
+};

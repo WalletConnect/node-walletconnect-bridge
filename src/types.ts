@@ -1,24 +1,24 @@
-import WebSocket from 'ws'
+import WebSocket from "ws";
 
-export type WebSocketData = WebSocket.Data
+export type WebSocketData = WebSocket.Data;
 
 export interface IWebSocket extends WebSocket {
-  isAlive: boolean
+  isAlive: boolean;
 }
 
 export interface ISocketMessage {
-  topic: string
-  type: string
-  payload: string
-  silent: boolean
+  topic: string;
+  type: string;
+  payload: string;
+  silent: boolean;
 }
 
 export interface ISocketSub {
-  topic: string
-  socket: IWebSocket
+  topic: string;
+  socket: IWebSocket;
 }
 
 export interface INotification {
-  topic: string
-  webhook: string
+  topic: string;
+  webhook: string;
 }

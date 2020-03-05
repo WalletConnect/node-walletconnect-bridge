@@ -1,94 +1,96 @@
-import fastify from 'fastify'
-import Helmet from 'fastify-helmet'
-import WebSocket from 'ws'
-import config from './config'
-import pubsub from './pubsub'
-import { IWebSocket } from './types'
-import { setNotification } from './notification'
-import pkg from '../package.json'
+import fastify from "fastify";
+import Helmet from "fastify-helmet";
+import WebSocket from "ws";
+import config from "./config";
+import pubsub from "./pubsub";
+import { IWebSocket } from "./types";
+import { setNotification } from "./notification";
+import pkg from "../package.json";
 
-const app = fastify({ logger: config.debug })
+const app = fastify({ logger: config.debug });
 
-app.register(Helmet)
+app.register(Helmet);
 
-app.get('/health', (_, res) => {
-  res.status(204).send()
-})
+app.get("/health", (_, res) => {
+  res.status(204).send();
+});
 
-app.get('/hello', (req, res) => {
-  res.status(200).send(`Hello World, this is WalletConnect v${pkg.version}`)
-})
+app.get("/hello", (req, res) => {
+  res.status(200).send(`Hello World, this is WalletConnect v${pkg.version}`);
+});
 
-app.get('/info', (req, res) => {
+app.get("/info", (req, res) => {
   res.status(200).send({
     name: pkg.name,
     description: pkg.description,
-    version: pkg.version
-  })
-})
+    version: pkg.version,
+  });
+});
 
-app.post('/subscribe', (req, res) => {
-  if (!req.body || typeof req.body !== 'object') {
+app.post("/subscribe", (req, res) => {
+  if (!req.body || typeof req.body !== "object") {
     res.status(400).send({
-      message: 'Error: missing or invalid request body'
-    })
+      message: "Error: missing or invalid request body",
+    });
   }
 
-  const { topic, webhook } = req.body
+  const { topic, webhook } = req.body;
 
-  if (!topic || typeof topic !== 'string') {
+  if (!topic || typeof topic !== "string") {
     res.status(400).send({
-      message: 'Error: missing or invalid topic field'
-    })
+      message: "Error: missing or invalid topic field",
+    });
   }
 
-  if (!webhook || typeof webhook !== 'string') {
+  if (!webhook || typeof webhook !== "string") {
     res.status(400).send({
-      message: 'Error: missing or invalid webhook field'
-    })
+      message: "Error: missing or invalid webhook field",
+    });
   }
 
-  setNotification({ topic, webhook })
+  setNotification({ topic, webhook });
 
   res.status(200).send({
-    success: true
-  })
-})
+    success: true,
+  });
+});
 
-const wsServer = new WebSocket.Server({ server: app.server })
+const wsServer = new WebSocket.Server({ server: app.server });
 
 app.ready(() => {
-  wsServer.on('connection', (socket: IWebSocket) => {
-    socket.on('message', async data => {
-      pubsub(socket, data)
-    })
+  wsServer.on("connection", (socket: IWebSocket) => {
+    socket.on("message", async data => {
+      pubsub(socket, data);
+    });
 
-    socket.on('pong', () => {
-      socket.isAlive = true
-    })
-  })
+    socket.on("pong", () => {
+      socket.isAlive = true;
+    });
+  });
 
   setInterval(
     () => {
-      const sockets: any = wsServer.clients
+      const sockets: any = wsServer.clients;
       sockets.forEach((socket: IWebSocket) => {
         if (socket.isAlive === false) {
-          return socket.terminate()
+          return socket.terminate();
         }
 
-        function noop () {}
+        function noop() {
+          // empty
+        }
 
-        socket.isAlive = false
-        socket.ping(noop)
-      })
+        socket.isAlive = false;
+        socket.ping(noop);
+      });
     },
-    10000 // 10 seconds
-  )
-})
+    10000, // 10 seconds
+  );
+});
 
-const [host, port] = config.host.split(':')
+const [host, port] = config.host.split(":");
 app.listen(+port, host, (err, address) => {
-  if (err) throw err
-  console.log(`Server listening on ${address}`)
-  app.log.info(`Server listening on ${address}`)
-})
+  if (err) throw err;
+  console.log(`Server listening on ${address}`);
+  app.log.info(`Server listening on ${address}`);
+});
