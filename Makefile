@@ -1,11 +1,11 @@
 ### Deploy configs
-BRANCH=$(shell git for-each-ref --format='%(objectname) %(refname:short)' refs/heads | awk "/^$$(git rev-parse HEAD)/ {print \$$2}")
+BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 REMOTE="https://github.com/WalletConnect/node-walletconnect-bridge"
 REMOTE_HASH=$(shell git ls-remote $(REMOTE) $(BRANCH) | head -n1 | cut -f1)
 project=walletconnect
 redisImage='redis:5-alpine'
 nginxImage='walletconnect/nginx:$(BRANCH)'
-walletConnectImage='walletconnect/proxy:$(BRANCH)'
+walletConnectImage='walletconnect/bridge:$(BRANCH)'
 
 BRIDGE_URL=$(shell cat config | grep BRIDGE_URL | cut -f2 -d=)
 CERTBOT_EMAIL=$(shell cat config | grep CERTBOT_EMAIL | cut -f2 -d=)
@@ -28,7 +28,7 @@ default:
 	@echo "dev:           runs local docker stack with open ports"
 	@echo "deploy:        deploys to production"
 	@echo "stop:          stops all walletconnect docker stacks"
-	@echo "upgrade:       stops current docker stack. Pulls from remote git. Runs deploys production using deploy rule"
+	@echo "upgrade:       Pulls from remote git. Builds the containers and updates each individual container currently running with the new version taht was just built."
 	@echo "clean:         cleans current docker build"
 	@echo "reset:         reset local config"
 
@@ -102,12 +102,16 @@ stop:
 	@echo  "MAKE: Done with $@"
 	@echo
 
-upgrade: stop
-	git fetch origin $(BRANCH)
-	git merge origin/$(BRANCH)
-	$(MAKE) deploy
+upgrade: setup
+	rm -f $(flags)/build*
+	$(MAKE) build
 	@echo  "MAKE: Done with $@"
 	@echo
+	git fetch origin $(BRANCH)
+	git merge origin/$(BRANCH)
+	docker service update --force $(project)_node
+	docker service update --force $(project)_nginx
+	docker service update --force $(project)_redis
 
 reset:
 	rm -rf .makeFlags
