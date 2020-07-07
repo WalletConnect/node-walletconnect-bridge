@@ -60,6 +60,7 @@ build-node: pull
 build-nginx: pull
 	docker build \
 		-t $(nginxImage) \
+		--no-cache \
 		--build-arg BRANCH=$(BRANCH) \
 		--build-arg REMOTE_HASH=$(REMOTE_HASH) \
 		-f ops/nginx.Dockerfile .
