@@ -8,7 +8,7 @@ import { IWebSocket } from './types'
 import pkg from '../package.json'
 
 const app = fastify({
-  logger: { prettyPrint: config.debug ? { forceColor: true } : undefined }
+  logger: { prettyPrint: { forceColor: true } }
 })
 
 app.register(Helmet)
@@ -91,6 +91,5 @@ app.ready(() => {
 const [host, port] = config.host.split(':')
 app.listen(+port, host, (err, address) => {
   if (err) throw err
-  console.log(`Server listening on ${address}`)
   app.log.info(`Server listening on ${address}`)
 })
