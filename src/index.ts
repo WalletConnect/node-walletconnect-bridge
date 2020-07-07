@@ -7,7 +7,9 @@ import { setNotification } from './keystore'
 import { IWebSocket } from './types'
 import pkg from '../package.json'
 
-const app = fastify({ logger: config.debug })
+const app = fastify({
+  logger: { prettyPrint: config.debug ? { forceColor: true } : undefined }
+})
 
 app.register(Helmet)
 
@@ -60,7 +62,7 @@ const wsServer = new WebSocket.Server({ server: app.server })
 app.ready(() => {
   wsServer.on('connection', (socket: IWebSocket) => {
     socket.on('message', async data => {
-      pubsub(socket, data)
+      pubsub(socket, data, app.log)
     })
 
     socket.on('pong', () => {

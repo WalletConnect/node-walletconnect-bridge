@@ -1,5 +1,7 @@
 import WebSocket from 'ws'
 
+export { Logger } from 'fastify'
+
 export type WebSocketData = WebSocket.Data
 
 export interface IWebSocket extends WebSocket {
