@@ -1,16 +1,12 @@
-import { ISocketMessage, ISocketSub, IWebSocket, WebSocketData } from './types'
+import { ISocketMessage, ISocketSub, IWebSocket, WebSocketData,Logger } from './types'
 import { pushNotification } from './notification'
 import { setSub, getSub, setPub, getPub } from './keystore'
 
-function log (type: string, message: string) {
-  console.log({ log: true, type, message })
-}
-
-async function socketSend (socket: IWebSocket, socketMessage: ISocketMessage) {
+async function socketSend (socket: IWebSocket, socketMessage: ISocketMessage , logger: Logger) {
   if (socket.readyState === 1) {
     const message = JSON.stringify(socketMessage)
-    log('outgoing', message)
     socket.send(message)
+    logger.info({ type: 'outgoing', message })
   } else {
     await setPub(socketMessage)
   }
@@ -18,7 +14,8 @@ async function socketSend (socket: IWebSocket, socketMessage: ISocketMessage) {
 
 async function SubController (
   socket: IWebSocket,
-  socketMessage: ISocketMessage
+  socketMessage: ISocketMessage,
+  logger: Logger
 ) {
   const topic = socketMessage.topic
 
@@ -31,13 +28,13 @@ async function SubController (
   if (pending && pending.length) {
     await Promise.all(
       pending.map((pendingMessage: ISocketMessage) =>
-        socketSend(socket, pendingMessage)
+        socketSend(socket, pendingMessage, logger)
       )
     )
   }
 }
 
-async function PubController (socketMessage: ISocketMessage) {
+async function PubController (socketMessage: ISocketMessage, logger: Logger) {
   const subscribers = await getSub(socketMessage.topic)
 
   if (!socketMessage.silent) {
@@ -47,22 +44,22 @@ async function PubController (socketMessage: ISocketMessage) {
   if (subscribers.length) {
     await Promise.all(
       subscribers.map((subscriber: ISocketSub) =>
-        socketSend(subscriber.socket, socketMessage)
+        socketSend(subscriber.socket, socketMessage, logger)
       )
     )
   } else {
-    await setPub(socketMessage)
+    await setPub(socketMessage) 
   }
 }
 
-export default async (socket: IWebSocket, data: WebSocketData) => {
+export default async (socket: IWebSocket, data: WebSocketData, logger: Logger) => {
   const message: string = String(data)
 
   if (!message || !message.trim()) {
     return
   }
 
-  log('incoming', message)
+  logger.info({ type: 'incoming', message })
 
   try {
     let socketMessage: ISocketMessage | null = null
@@ -79,10 +76,10 @@ export default async (socket: IWebSocket, data: WebSocketData) => {
 
     switch (socketMessage.type) {
       case 'sub':
-        await SubController(socket, socketMessage)
+        await SubController(socket, socketMessage, logger)
         break
       case 'pub':
-        await PubController(socketMessage)
+        await PubController(socketMessage, logger)
         break
       default:
         break
