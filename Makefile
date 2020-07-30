@@ -63,7 +63,7 @@ build-nginx: pull
 		--no-cache \
 		--build-arg BRANCH=$(BRANCH) \
 		--build-arg REMOTE_HASH=$(REMOTE_HASH) \
-		-f ops/nginx.Dockerfile .
+		-f ops/nginx/nginx.Dockerfile ./ops/nginx
 	@touch $(flags)/$@
 	@echo  "MAKE: Done with $@"
 	@echo
