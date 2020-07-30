@@ -8,15 +8,6 @@ services:
       EMAIL: ${CERTBOT_EMAIL}
       NODE_DOCKER_NAME: node
       NODE_PORT: 5000
-    ports:
-      - mode: host
-        protocol: tcp
-        published: 80
-        target: 80
-      - mode: host
-        protocol: tcp
-        published: 443
-        target: 443
 
   node1:
     image: ${WALLET_IMAGE}
