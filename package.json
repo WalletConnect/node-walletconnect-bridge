@@ -17,6 +17,7 @@
     "bluebird": "^3.5.5",
     "fastify": "^2.4.1",
     "fastify-helmet": "^3.0.0",
+    "pino-pretty": "^4.1.0",
     "redis": "^2.8.0",
     "ws": "^7.0.0"
   },
