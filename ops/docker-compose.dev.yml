@@ -4,6 +4,6 @@ services:
   redis:
     ports:
       - "6379:6379"
-  node:
+  node1:
     ports:
-      - "5001:5001"
+      - "5000"

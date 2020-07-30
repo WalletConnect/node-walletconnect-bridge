@@ -13,8 +13,14 @@ services:
     deploy:
       mode: global
     ports:
-      - "443:443"
-      - "80:80"
+      - mode: host
+        protocol: tcp
+        published: 80
+        target: 80
+      - mode: host
+        protocol: tcp
+        published: 443
+        target: 443
     volumes:
       - letsencrypt:/etc/letsencrypt
     depends_on:
@@ -25,8 +31,3 @@ services:
     volumes:
       - redis:/data
 
-  node:
-    image: ${WALLET_IMAGE}
-    environment:
-      NODE_ENV: development
-      REDIS_URL: redis://redis:6379/0
