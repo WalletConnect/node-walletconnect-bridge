@@ -4,8 +4,8 @@ REMOTE="https://github.com/WalletConnect/node-walletconnect-bridge"
 REMOTE_HASH=$(shell git ls-remote $(REMOTE) $(BRANCH) | head -n1 | cut -f1)
 project=walletconnect
 redisImage='redis:5-alpine'
-nginxImage='walletconnect/nginx:$(BRANCH)'
-walletConnectImage='walletconnect/proxy:$(BRANCH)'
+nginxImage='$(project)/nginx:$(BRANCH)'
+walletConnectImage='$(project)/bridge:$(BRANCH)'
 
 BRIDGE_URL=$(shell cat config | grep BRIDGE_URL | cut -f2 -d=)
 CERTBOT_EMAIL=$(shell cat config | grep CERTBOT_EMAIL | cut -f2 -d=)
@@ -90,6 +90,17 @@ deploy: setup build
 	CERTBOT_EMAIL=$(CERTBOT_EMAIL) \
 	docker stack deploy -c ops/docker-compose.yml \
 	-c ops/docker-compose.prod.yml $(project)
+	@echo  "MAKE: Done with $@"
+	@echo
+
+deploy-monitoring: setup build
+	WALLET_IMAGE=$(walletConnectImage) \
+	NGINX_IMAGE=$(nginxImage) \
+	BRIDGE_URL=$(BRIDGE_URL) \
+	CERTBOT_EMAIL=$(CERTBOT_EMAIL) \
+	docker stack deploy -c ops/docker-compose.yml \
+	-c ops/docker-compose.prod.yml \
+	-c ops/docker-compose.monitor.yml $(project)
 	@echo  "MAKE: Done with $@"
 	@echo
 

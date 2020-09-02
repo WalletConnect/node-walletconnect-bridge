@@ -17,8 +17,6 @@ services:
       - "80:80"
     volumes:
       - letsencrypt:/etc/letsencrypt
-    depends_on:
-      - node
 
   redis:
     image: 'redis:5-alpine'
