@@ -14,7 +14,33 @@ services:
       - node3
       - node4
       - node5
-
+      - node
   node:
     environment:
       NODE_ENV: production
+
+  node1:
+    image: ${WALLET_IMAGE}
+    environment:
+      NODE_ENV: production
+      REDIS_URL: redis://redis:6379/0
+  node2:
+    image: ${WALLET_IMAGE}
+    environment:
+      NODE_ENV: production
+      REDIS_URL: redis://redis:6379/0
+  node3:
+    image: ${WALLET_IMAGE}
+    environment:
+      NODE_ENV: production
+      REDIS_URL: redis://redis:6379/0
+  node4:
+    image: ${WALLET_IMAGE}
+    environment:
+      NODE_ENV: production
+      REDIS_URL: redis://redis:6379/0
+  node5:
+    image: ${WALLET_IMAGE}
+    environment:
+      NODE_ENV: production
+      REDIS_URL: redis://redis:6379/0

@@ -24,11 +24,10 @@ servers=/etc/nginx/servers
 mkdir -p /var/www/letsencrypt
 mkdir -p $servers
 
-for sub in $subdomains; do
-  echo "SUB: $sub"
-  sub=$(echo $sub | cut -d':' -f 1)
-
-  if [[ "$domain" == "localhost" && ! -f "$certpath/privkey.pem" ]]
+function makeCert () {
+  fullDomain=$1
+  certpath=$2
+  if [[ "$fullDomain" == "localhost" && ! -f "$certpath/privkey.pem" ]]
   then
     echo "Developing locally, generating self-signed certs"
     openssl req -x509 -newkey rsa:4096 -keyout $certpath/privkey.pem -out $certpath/fullchain.pem -days 365 -nodes -subj '/CN=localhost'
@@ -36,8 +35,8 @@ for sub in $subdomains; do
 
   if [[ ! -f "$certpath/privkey.pem" ]]
   then
-    echo "Couldn't find certs for $sub.$domain, using certbot to initialize those now.."
-    certbot certonly --standalone -m $email --agree-tos --no-eff-email -d $sub.$domain -n
+    echo "Couldn't find certs for $fullDomain, using certbot to initialize those now.."
+    certbot certonly --standalone -m $email --agree-tos --no-eff-email -d $fullDomain -n
     if [[ ! $? -eq 0 ]] 
     then
       echo "ERROR"
@@ -45,112 +44,82 @@ for sub in $subdomains; do
       sleep 9999 # FREEZE! Don't pester eff & get throttled
     fi
   fi
-done
+}
 
-cat - > "${servers}/grafana.conf" <<EOF
+for sub in $subdomains; do
+  echo "SUB: $sub"
+  port=$(echo $sub | cut -d':' -f 2)
+  sub=$(echo $sub | cut -d':' -f 1)
+  makeCert "$sub.$domain" "$letsencrypt/$sub.$domain"
+  cat - > "$servers/$sub.$domain.conf" <<EOF
 server {
   listen  80;
-  server_name grafana.$domain;
+  server_name $sub.$domain;
   location / {
     return 301 https://\$host\$request_uri;
   }
 }
-
 server {
   listen  443 ssl;
-  ssl_certificate       /etc/letsencrypt/live/grafana.$domain/fullchain.pem;
-  ssl_certificate_key   /etc/letsencrypt/live/grafana.$domain/privkey.pem;
-  server_name grafana.$domain;
+  ssl_certificate       /etc/letsencrypt/live/$sub.$domain/fullchain.pem;
+  ssl_certificate_key   /etc/letsencrypt/live/$sub.$domain/privkey.pem;
+  server_name $sub.$domain;
   location / {
-		proxy_pass "http://grafana:3000";
+		proxy_pass "http://$sub:$port";
   }
 }
 EOF
+done
 
-echo "DOMAIN: $domain"
-certpath="$letsencrypt/$domain"
+echo "ROOT DOMAIN: $domain"
+makeCert $domain $letsencrypt/$domain
 
-if [[ "$domain" == "localhost" && ! -f "$certpath/privkey.pem" ]]
-then
-  echo "Developing locally, generating self-signed certs"
-  openssl req -x509 -newkey rsa:4096 -keyout $certpath/privkey.pem -out $certpath/fullchain.pem -days 365 -nodes -subj '/CN=localhost'
-fi
-
-if [[ ! -f "$certpath/privkey.pem" ]]
-then
-  echo "Couldn't find certs for $domain, using certbot to initialize those now.."
-  certbot certonly --standalone -m $email --agree-tos --no-eff-email -d $domain -n
-  if [[ ! $? -eq 0 ]] 
-  then
-    echo "ERROR"
-    echo "Sleeping to not piss off certbot"
-    sleep 9999 # FREEZE! Don't pester eff & get throttled
-  fi
-fi
-
-#cat - > "${servers}/$domain.conf" <<EOF
-cat - > "/tmp/$domain.conf" <<EOF
+cat - > "$servers/$domain.conf" <<EOF
 upstream bridge {
   #hash   \$request_uri consistent;
   #hash   \$remote_addr consistent;
-  hash    \$http_user_agent\$request_uri\$remote_addr consistent;
+  #hash    \$http_user_agent\$request_uri\$remote_addr consistent;
+  hash    \$http_user_agent\$remote_addr consistent;
   server node1:$node_port;
   server node2:$node_port;
   server node3:$node_port;
   server node4:$node_port;
   server node5:$node_port;
 }
-
 server {
-    listen 80;
-    server_name $domain;
-    location / {
-        return 301 https://\$host\$request_uri;
-    }
+  listen 80;
+  server_name $domain;
+  location / {
+    return 301 https://\$host\$request_uri;
+  }
 }
 
-### HTPPS
+### HTTPS
 server {
   listen 443 ssl;
   server_name $domain;
+  # https://stackoverflow.com/questions/35744650/docker-network-nginx-resolver
+  resolver 127.0.0.11 valid=30s;
  
   ssl_dhparam               /etc/ssl/dhparams.pem;
   ssl_certificate           /etc/letsencrypt/live/$domain/fullchain.pem;
   ssl_certificate_key       /etc/letsencrypt/live/$domain/privkey.pem;
-  ssl_session_cache         shared:SSL:10m; 
-  ssl_session_timeout       1d;
+  ssl_session_cache         shared:SSL:4m;  # This is size not duration
+  ssl_session_timeout       1m;
   ssl_protocols             TLSv1.2 TLSv1.3; 
   ssl_prefer_server_ciphers on;
   ssl_ecdh_curve            secp384r1;
   ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
 
   location / {
+      proxy_read_timeout      30;
       proxy_http_version      1.1;
       proxy_set_header        Upgrade \$http_upgrade;
       proxy_set_header        Connection "Upgrade";
       proxy_set_header        Host \$host;
-
-      # Not used in websocket
-      #proxy_set_header        X-Real-IP \$remote_addr;
-      #proxy_set_header        X-Forwarded-For \$proxy_add_x_forwarded_for;
-      #proxy_set_header        X-Forwarded-Proto \$scheme;
-
+      proxy_set_header        http_x_forwarded_for  \$remote_addr;
+      set \$upstream bridge;
       proxy_pass              http://bridge;
-      proxy_ssl_server_name   on;
-      proxy_read_timeout      90;
-
-      # Simple requests
-      if (\$request_method ~* "(GET|POST)") {
-          add_header "Access-Control-Allow-Origin"  *;
-      }
-
-      # Preflighted requests
-      if (\$request_method = OPTIONS ) {
-          add_header "Access-Control-Allow-Origin"  *;
-          add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, HEAD";
-          add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Requested-With, Content-Type, Accept";
-          return 200;
-      }
   }
 }
 EOF
