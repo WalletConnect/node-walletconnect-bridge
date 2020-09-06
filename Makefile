@@ -92,6 +92,17 @@ deploy: setup build
 	@echo  "MAKE: Done with $@"
 	@echo
 
+deploy-monitoring: setup build
+	 WALLET_IMAGE=$(walletConnectImage) \
+	 NGINX_IMAGE=$(nginxImage) \
+	 BRIDGE_URL=$(BRIDGE_URL) \
+	 CERTBOT_EMAIL=$(CERTBOT_EMAIL) \
+	 docker stack deploy -c ops/docker-compose.yml \
+	 -c ops/docker-compose.prod.yml \
+	 -c ops/docker-compose.monitor.yml $(project)
+	 @echo  "MAKE: Done with $@"
+	 @echo
+
 stop: 
 	docker stack rm $(project)
 	docker stack rm dev_$(project)
