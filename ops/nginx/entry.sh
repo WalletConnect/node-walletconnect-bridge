@@ -1,28 +1,28 @@
 #!/bin/bash
 
 # Set default variables
-domain="${DOMAIN_URL:-localhost}"
+root_domain="${DOMAIN_URL:-localhost}"
+manage_root_domain=${MANAGE_ROOT_DOMAIN:-true}
 email="${EMAIL:-noreply@gmail.com}"
-subdomains="${SUBDOMAINS}"
+docker_containers="${SUBDOMAINS}"
 node_env="${NODE_ENV:-development}"
-node_docker_name="${NODE_DOCKER_NAME:-node}"
 node_port="${NODE_PORT:-5001}"
+node_qty="${NODE_QTY:-5}"
 
+echo
 echo "
 USING ENVVARS:
-domain=$domain
-subdomains=$subdomains
-email=$email
+root_domain=$root_domain
+docker containers to proxy pass to (docker_containers)=$docker_containers
+cert email=$email
 node_env=$node_env
-node_docker_name=$node_docker_name
 node_port=$node_port
+node_qty=$node_qty
 "
+echo
 
-# Setup SSL Certs
-letsencrypt=/etc/letsencrypt/live
-servers=/etc/nginx/servers
-mkdir -p /var/www/letsencrypt
-mkdir -p $servers
+LETSENCRYPT=/etc/letsencrypt/live
+SERVERS=/etc/nginx/servers
 
 function makeCert () {
   fullDomain=$1
@@ -46,35 +46,59 @@ function makeCert () {
   fi
 }
 
-for sub in $subdomains; do
-  echo "SUB: $sub"
-  port=$(echo $sub | cut -d':' -f 2)
-  sub=$(echo $sub | cut -d':' -f 1)
-  makeCert "$sub.$domain" "$letsencrypt/$sub.$domain"
-  cat - > "$servers/$sub.$domain.conf" <<EOF
+function waitForContainerToBeUp () {
+  count=0
+  while true; do
+    ping -c 1 $1
+    if [ $1 ]; then
+      break
+    fi
+    if [[ $count -gt 20 ]]; then
+      echo "Container $1 is not live! Exiting"
+      exit 1
+    fi
+    count=$((1 + $count))
+  done
+}
+
+function configSubDomain () {
+  subDomain=$1
+  dockerPort=$2
+  rootDomain=$3
+  fullDomain=$subDomain.$rootDomain
+  echo "Full subdomain: $fullDomain"
+  makeCert "$fullDomain" "$LETSENCRYPT/$rootDomain"
+  cat - > "$SERVERS/$fullDomain.conf" <<EOF
 server {
   listen  80;
-  server_name $sub.$domain;
+  server_name $fullDomain;
   location / {
     return 301 https://\$host\$request_uri;
   }
 }
 server {
   listen  443 ssl;
-  ssl_certificate       /etc/letsencrypt/live/$sub.$domain/fullchain.pem;
-  ssl_certificate_key   /etc/letsencrypt/live/$sub.$domain/privkey.pem;
-  server_name $sub.$domain;
+  ssl_certificate       $LETSENCRYPT/$fullDomain/fullchain.pem;
+  ssl_certificate_key   $LETSENCRYPT/$fullDomain/privkey.pem;
+  server_name $fullDomain;
   location / {
-		proxy_pass "http://$sub:$port";
+		proxy_pass "http://$subDomain:$dockerPort";
   }
 }
 EOF
-done
+}
 
-echo "ROOT DOMAIN: $domain"
-makeCert $domain $letsencrypt/$domain
+function configRootDomain () {
+  domain=$1
+  echo "ROOT DOMAIN: $domain"
+  makeCert $domain $LETSNECRYPT/$domain
 
-cat - > "$servers/$domain.conf" <<EOF
+  configPath="$SERVERS/$domain.conf"
+
+  if [[ "$node_qty" -gt 1 ]]; then
+    echo
+  fi
+  cat - > $configPath <<EOF
 upstream bridge {
   #hash   \$request_uri consistent;
   #hash   \$remote_addr consistent;
@@ -123,6 +147,7 @@ server {
   }
 }
 EOF
+}
 
 # periodically fork off & see if our certs need to be renewed
 function renewcerts {
@@ -139,14 +164,31 @@ function renewcerts {
   done
 }
 
-if [[ "$domain" != "localhost" ]]
-then
-  echo "Forking renewcerts to the background..."
-  renewcerts &
-fi
+function main () {
+  # Setup SSL Certs
+  mkdir -p $LETSENCRYPT
+  mkdir -p $SERVERS
+  for container_port in $docker_containers; do
+    port=$(echo $container_port | cut -d':' -f 2)
+    container=$(echo $container_port | cut -d':' -f 1)
+    waitForContainerToBeUp $container
+    configSubDomain $container $port $root_domain 
+  done
 
-sleep 3 # give renewcerts a sec to do it's first check
+  if [ $manage_root_domain ]; then
+    configRootDomain $root_domain $node_qty
+  fi
 
-echo "Entrypoint finished, executing nginx..."; echo
-exec nginx
+  if [[ "$domain" != "localhost" ]]
+  then
+    echo "Forking renewcerts to the background..."
+    renewcerts &
+  fi
 
+  sleep 3 # give renewcerts a sec to do it's first check
+
+  echo "Entrypoint finished, executing nginx..."; echo
+  exec nginx
+}
+
+main
