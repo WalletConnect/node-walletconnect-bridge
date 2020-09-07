@@ -1,14 +1,19 @@
 #!/bin/bash
 
-# Set default variables
+# The root domain of the application
 root_domain="${DOMAIN_URL:-localhost}"
+# disables the nginx management of the root domain.
+# only subdomains will be managed if any exist
 manage_root_domain=${MANAGE_ROOT_DOMAIN:-true}
+# The email for the certbot expiry notification
 email="${EMAIL:-noreply@gmail.com}"
+# subdomains will match to a single docker container name
 docker_containers="${SUBDOMAINS}"
-app_container_dns_name="${CONTAINER_NAME}"
-app_env="${NODE_ENV:-development}"
-app_port="${NODE_PORT:-5001}"
-app_qty="${NODE_QTY:-5}"
+# The main root app container name
+app_container_dns_name="${APP_CONTAINER_NAME}"
+app_env="${APP_ENV:-development}"
+app_port="${APP_PORT:-5001}"
+app_qty="${APP_QTY:-5}"
 
 echo
 echo "

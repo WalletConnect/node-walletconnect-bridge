@@ -1,24 +1,11 @@
-version: '3.7'
+#!/usr/bin/env bash
 
-services:
-  nginx:
-    environment:
-      DOMAIN_URL: ${BRIDGE_URL}
-      NODE_ENV: production
-      EMAIL: ${CERTBOT_EMAIL}
-      NODE_DOCKER_NAME: node
-      NODE_PORT: 5000
+originalCompose=$(cat ./docker-compose.prod.yml)
+
+
+cat - > /tmp/$PORJECT.prod.yml <<EOF
+  $originalCompose
     depends_on:
-      - node1
-      - node2
-      - node3
-      - node4
-      - node5
-      - node
-  node:
-    environment:
-      NODE_ENV: production
-
   node1:
     image: ${WALLET_IMAGE}
     environment:
@@ -44,3 +31,4 @@ services:
     environment:
       NODE_ENV: production
       REDIS_URL: redis://redis:6379/0
+EOF

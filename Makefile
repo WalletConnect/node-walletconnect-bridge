@@ -6,8 +6,9 @@ project=walletconnect
 redisImage='redis:5-alpine'
 nginxImage='$(project)/nginx:$(BRANCH)'
 walletConnectImage='$(project)/bridge:$(BRANCH)'
+defaultAppQty=5
 
-BRIDGE_URL=$(shell cat config | grep BRIDGE_URL | cut -f2 -d=)
+DOMAIN_URL=$(shell cat config | grep DOMAIN_URL | cut -f2 -d=)
 CERTBOT_EMAIL=$(shell cat config | grep CERTBOT_EMAIL | cut -f2 -d=)
 
 ### Makefile internal coordination
@@ -40,7 +41,7 @@ pull:
 
 setup:
 	@read -p 'Bridge URL domain: ' bridge; \
-	echo "BRIDGE_URL="$$bridge > config
+	echo "DOMAIN_URL="$$bridge > config
 	@read -p 'Email for SSL certificate (default noreply@gmail.com): ' email; \
 	echo "CERTBOT_EMAIL="$$email >> config
 	@touch $(flags)/$@
@@ -73,6 +74,7 @@ build: pull build-node build-nginx
 	@echo
 
 dev: build
+	APP_NAME=bridge \
 	WALLET_IMAGE=$(walletConnectImage) \
 	NGINX_IMAGE=$(nginxImage) \
 	docker stack deploy \
@@ -82,20 +84,23 @@ dev: build
 	@echo  "MAKE: Done with $@"
 	@echo
 
-deploy: setup build
+setup-deploy:
+	bash ops/setup-deploy.sh
+
+deploy: setup build setup-deploy
 	WALLET_IMAGE=$(walletConnectImage) \
 	NGINX_IMAGE=$(nginxImage) \
-	BRIDGE_URL=$(BRIDGE_URL) \
+	DOMAIN_URL=$(DOMAIN_URL) \
 	CERTBOT_EMAIL=$(CERTBOT_EMAIL) \
 	docker stack deploy -c ops/docker-compose.yml \
 	-c ops/docker-compose.prod.yml $(project)
 	@echo  "MAKE: Done with $@"
 	@echo
 
-deploy-monitoring: setup build
+deploy-monitoring: setup build setup-deploy
 	 WALLET_IMAGE=$(walletConnectImage) \
 	 NGINX_IMAGE=$(nginxImage) \
-	 BRIDGE_URL=$(BRIDGE_URL) \
+	 DOMAIN_URL=$(DOMAIN_URL) \
 	 CERTBOT_EMAIL=$(CERTBOT_EMAIL) \
 	 docker stack deploy -c ops/docker-compose.yml \
 	 -c ops/docker-compose.prod.yml \
@@ -111,6 +116,8 @@ stop:
 	while [ -n "`docker network ls --quiet --filter label=com.docker.stack.namespace=dev_$(project)`" ]; do echo -n '.' && sleep 1; done
 	@echo  "MAKE: Done with $@"
 	@echo
+
+down: stop
 
 upgrade: setup
 	rm -f $(flags)/build*
@@ -131,5 +138,10 @@ reset:
 
 clean:
 	rm -rf .makeFlags/build*
+	@echo  "MAKE: Done with $@"
+	@echo
+
+clean-all:
+	rm -rf .makeFlags
 	@echo  "MAKE: Done with $@"
 	@echo
