@@ -5,9 +5,10 @@ root_domain="${DOMAIN_URL:-localhost}"
 manage_root_domain=${MANAGE_ROOT_DOMAIN:-true}
 email="${EMAIL:-noreply@gmail.com}"
 docker_containers="${SUBDOMAINS}"
-node_env="${NODE_ENV:-development}"
-node_port="${NODE_PORT:-5001}"
-node_qty="${NODE_QTY:-5}"
+app_container_dns_name="${CONTAINER_NAME}"
+app_env="${NODE_ENV:-development}"
+app_port="${NODE_PORT:-5001}"
+app_qty="${NODE_QTY:-5}"
 
 echo
 echo "
@@ -15,9 +16,9 @@ USING ENVVARS:
 root_domain=$root_domain
 docker containers to proxy pass to (docker_containers)=$docker_containers
 cert email=$email
-node_env=$node_env
-node_port=$node_port
-node_qty=$node_qty
+app_env=$app_env
+app_port=$app_port
+app_qty=$app_qty
 "
 echo
 
@@ -43,6 +44,11 @@ function makeCert () {
       echo "Sleeping to not piss off certbot"
       sleep 9999 # FREEZE! Don't pester eff & get throttled
     fi
+  fi
+  if [[ "$fullDomain" != "localhost" ]]
+  then
+    echo "Forking renewcerts to the background..."
+    renewcerts $fullDomain &
   fi
 }
 
@@ -88,28 +94,31 @@ server {
 EOF
 }
 
+function configLoadBalancingForApp () {
+  configPath="${1:-$SERVERS/$1}"
+  appQty=${2:-1}
+  port=${3:-5001}
+  dockerContainerName=$4
+  if [[ ! $dockerContainerName ]]; then
+    printf "Need to give the docker name of the main app. Quitting...\n"
+    exit 1
+  fi
+  cat - >> $configPath <<EOF
+upstream app {
+  hash    \$http_user_agent\$remote_addr consistent;
+EOF
+  for i in $(seq 1 $appQty); do
+    echo "server $dockerContainerName$i:$port;" >> $configPath
+  done
+  echo "}" >> $configPath
+}
+
 function configRootDomain () {
   domain=$1
-  echo "ROOT DOMAIN: $domain"
-  makeCert $domain $LETSNECRYPT/$domain
-
+  printf "\nROOT DOMAIN: $domain\n"
+  makeCert $domain $LETSENCRYPT/$domain
   configPath="$SERVERS/$domain.conf"
-
-  if [[ "$node_qty" -gt 1 ]]; then
-    echo
-  fi
   cat - > $configPath <<EOF
-upstream bridge {
-  #hash   \$request_uri consistent;
-  #hash   \$remote_addr consistent;
-  #hash    \$http_user_agent\$request_uri\$remote_addr consistent;
-  hash    \$http_user_agent\$remote_addr consistent;
-  server node1:$node_port;
-  server node2:$node_port;
-  server node3:$node_port;
-  server node4:$node_port;
-  server node5:$node_port;
-}
 server {
   listen 80;
   server_name $domain;
@@ -117,8 +126,6 @@ server {
     return 301 https://\$host\$request_uri;
   }
 }
-
-### HTTPS
 server {
   listen 443 ssl;
   server_name $domain;
@@ -126,8 +133,8 @@ server {
   resolver 127.0.0.11 valid=30s;
  
   ssl_dhparam               /etc/ssl/dhparams.pem;
-  ssl_certificate           /etc/letsencrypt/live/$domain/fullchain.pem;
-  ssl_certificate_key       /etc/letsencrypt/live/$domain/privkey.pem;
+  ssl_certificate           $LETSENCRYPT/$domain/fullchain.pem;
+  ssl_certificate_key       $LETSENCRYPT/$domain/privkey.pem;
   ssl_session_cache         shared:SSL:4m;  # This is size not duration
   ssl_session_timeout       1m;
   ssl_protocols             TLSv1.2 TLSv1.3; 
@@ -143,7 +150,7 @@ server {
       proxy_set_header        Host \$host;
       proxy_set_header        http_x_forwarded_for  \$remote_addr;
       set \$upstream bridge;
-      proxy_pass              http://bridge;
+      proxy_pass              http://app;
   }
 }
 EOF
@@ -151,12 +158,13 @@ EOF
 
 # periodically fork off & see if our certs need to be renewed
 function renewcerts {
+  domain=$1
   while true
   do
-    echo -n "Preparing to renew certs... "
-    if [[ -d "/etc/letsencrypt/live/$domain" ]]
+    printf "Preparing to renew certs... "
+    if [[ -d "$LETSENCRYPT/$domain" ]]
     then
-      echo -n "Found certs to renew for $domain... "
+      printf "Found certs to renew for $domain... "
       certbot renew --webroot -w /var/www/letsencrypt/ -n
       echo "Done!"
     fi
@@ -164,10 +172,18 @@ function renewcerts {
   done
 }
 
+function checkDNS () {
+  domain=$1
+  # TODO
+  # Use netcat to check whether it can be connected to
+  # at the address nslookup
+}
+
 function main () {
   # Setup SSL Certs
   mkdir -p $LETSENCRYPT
   mkdir -p $SERVERS
+
   for container_port in $docker_containers; do
     port=$(echo $container_port | cut -d':' -f 2)
     container=$(echo $container_port | cut -d':' -f 1)
@@ -175,17 +191,17 @@ function main () {
     configSubDomain $container $port $root_domain 
   done
 
-  if [ $manage_root_domain ]; then
-    configRootDomain $root_domain $node_qty
+  if [[ $manage_root_domain ]]; then
+    configRootDomain $root_domain
+    #arguments: configPath appQty port dockerContainerName
+    configLoadBalancingForApp $SERVERS/$root_domain \
+      $app_qty \
+      $app_port \
+      $app_container_dns_name
   fi
 
-  if [[ "$domain" != "localhost" ]]
-  then
-    echo "Forking renewcerts to the background..."
-    renewcerts &
-  fi
 
-  sleep 3 # give renewcerts a sec to do it's first check
+  sleep 4 # give renewcerts a sec to do it's first check
 
   echo "Entrypoint finished, executing nginx..."; echo
   exec nginx
