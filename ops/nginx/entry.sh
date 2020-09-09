@@ -6,9 +6,9 @@ manage_root_domain=${MANAGE_ROOT_DOMAIN:-true}
 email="${EMAIL:-noreply@gmail.com}"
 docker_containers="${SUBDOMAINS}"
 app_container_dns_name="${CONTAINER_NAME}"
-app_env="${NODE_ENV:-development}"
-app_port="${NODE_PORT:-5001}"
-app_qty="${NODE_QTY:-5}"
+app_env="${APP_ENV:-development}"
+app_port="${APP_PORT:-5001}"
+app_qty="${APP_QTY:-5}"
 
 echo
 echo "
@@ -107,7 +107,7 @@ function configLoadBalancingForApp () {
 upstream app {
   hash    \$http_user_agent\$remote_addr consistent;
 EOF
-  for i in $(seq 1 $appQty); do
+  for i in $(seq 0 $((appQty - 1))); do
     echo "server $dockerContainerName$i:$port;" >> $configPath
   done
   echo "}" >> $configPath

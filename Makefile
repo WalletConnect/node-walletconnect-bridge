@@ -103,6 +103,8 @@ deploy-monitoring: setup build
 	 @echo  "MAKE: Done with $@"
 	 @echo
 
+down: stop
+
 stop: 
 	docker stack rm $(project)
 	docker stack rm dev_$(project)
@@ -131,5 +133,10 @@ reset:
 
 clean:
 	rm -rf .makeFlags/build*
+	@echo  "MAKE: Done with $@"
+	@echo
+
+clean-all:
+	rm -rf .makeFlags
 	@echo  "MAKE: Done with $@"
 	@echo

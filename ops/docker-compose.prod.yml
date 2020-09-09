@@ -4,21 +4,33 @@ services:
   nginx:
     environment:
       DOMAIN_URL: ${BRIDGE_URL}
-      NODE_ENV: production
+      APP_ENV: production
       EMAIL: ${CERTBOT_EMAIL}
-      NODE_DOCKER_NAME: node
-      NODE_PORT: 5000
+      CONTAINER_NAME: node
+      APP_PORT: 5000
+      APP_QTY: 5
     depends_on:
+      - node0
       - node1
       - node2
       - node3
       - node4
-      - node5
-      - node
+
   node:
+    entrypoint: ["echo", "Service foo disabled"]
+    restart: no
+
+  # Because of how the bridge application works
+  # every client request must go to the same bridge replica
+  # By giving each bridge docker service a unique
+  # name we can load balance via the docker internal
+  # service dns and have the nginx entry container
+  # handle the load balancing
+  node0:
+    image: ${WALLET_IMAGE}
     environment:
       NODE_ENV: production
-
+      REDIS_URL: redis://redis:6379/0
   node1:
     image: ${WALLET_IMAGE}
     environment:
@@ -35,11 +47,6 @@ services:
       NODE_ENV: production
       REDIS_URL: redis://redis:6379/0
   node4:
-    image: ${WALLET_IMAGE}
-    environment:
-      NODE_ENV: production
-      REDIS_URL: redis://redis:6379/0
-  node5:
     image: ${WALLET_IMAGE}
     environment:
       NODE_ENV: production
