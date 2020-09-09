@@ -13,8 +13,6 @@ services:
     deploy:
       mode: global
     # This port format is needed to get real ip address of the client
-    # This completely defeats the purpose of Docker swarm and routing with load balancing
-    # so are instead handling the load balancing with the nginx proxy
     ports:
       - target: 80
         published: 80
@@ -30,6 +28,10 @@ services:
     volumes:
       - redis:/data
 
+  # This naming of the docker containers completely defeats the
+  # purpose of Docker swarm and docker load balancing
+  # so we are instead handling the load balancing with
+  # our own nginx container
   node0:
     image: ${WALLET_IMAGE}
     environment:
