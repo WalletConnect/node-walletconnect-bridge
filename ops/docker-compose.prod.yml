@@ -16,10 +16,6 @@ services:
       - node3
       - node4
 
-  node:
-    entrypoint: ["echo", "Service foo disabled"]
-    restart: "no"
-
   # Because of how the bridge application works
   # every client request must go to the same bridge replica
   # By giving each bridge docker service a unique

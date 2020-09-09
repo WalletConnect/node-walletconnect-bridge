@@ -30,7 +30,7 @@ services:
     volumes:
       - redis:/data
 
-  node:
+  node0:
     image: ${WALLET_IMAGE}
     environment:
       NODE_ENV: development
