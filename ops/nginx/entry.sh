@@ -103,7 +103,7 @@ function configLoadBalancingForApp () {
     printf "Need to give the docker name of the main app. Quitting...\n"
     exit 1
   fi
-  cat - >> $configPath <<EOF
+  cat - >> $configPath<<EOF
 upstream app {
   hash    \$http_user_agent\$remote_addr consistent;
 EOF
@@ -194,7 +194,7 @@ function main () {
   if [[ $manage_root_domain ]]; then
     configRootDomain $root_domain
     #arguments: configPath appQty port dockerContainerName
-    configLoadBalancingForApp $SERVERS/$root_domain \
+    configLoadBalancingForApp "$SERVERS/$root_domain.conf" \
       $app_qty \
       $app_port \
       $app_container_dns_name
