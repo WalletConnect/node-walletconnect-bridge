@@ -20,16 +20,10 @@ services:
     command:
       - -nginx.scrape-uri
       - http://nginx:8080/nginx_status
-    ports:
-      - "8000:9113"
-
   prometheus:
     image: prom/prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - "9090:9090"
-
   grafana:
     image: grafana/grafana
     volumes:
