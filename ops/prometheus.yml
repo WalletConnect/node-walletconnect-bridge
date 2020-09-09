@@ -17,3 +17,10 @@ scrape_configs:
   static_configs:
   - targets:
     - 172.18.0.1:9323
+
+- job_name: nginx_exporter
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - "exporter:9113"

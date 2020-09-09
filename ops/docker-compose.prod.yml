@@ -18,7 +18,7 @@ services:
 
   node:
     entrypoint: ["echo", "Service foo disabled"]
-    restart: no
+    restart: "no"
 
   # Because of how the bridge application works
   # every client request must go to the same bridge replica
