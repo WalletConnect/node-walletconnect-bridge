@@ -14,16 +14,20 @@ services:
       SUBDOMAINS: "grafana:3000"
     depends_on:
       - grafana
+    volumes:
+      - ./nginx/exporter.conf:/etc/nginx/servers/exporter.conf
 
   exporter:
     image: nginx/nginx-prometheus-exporter
     command:
       - -nginx.scrape-uri
       - http://nginx:8080/stub_status
+
   prometheus:
     image: prom/prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
   grafana:
     image: grafana/grafana
     volumes:
