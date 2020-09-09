@@ -19,163 +19,67 @@
   "links": [],
   "panels": [
     {
-      "aliasColors": {
-        "mixnetnode": "dark-blue",
-        "up{instance=\"mixnetnode:6543\", job=\"mixnetnode\"}": "dark-blue"
-      },
+      "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "links": []
+          "custom": {}
         },
         "overrides": []
       },
-      "fill": 0,
+      "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 13,
+        "w": 13,
         "x": 0,
         "y": 0
       },
       "hiddenSeries": false,
-      "id": 41,
+      "id": 43,
       "legend": {
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
-        "show": false,
+        "show": true,
         "total": false,
         "values": false
       },
       "lines": true,
-      "linewidth": 5,
+      "linewidth": 1,
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.0",
+      "pluginVersion": "7.1.5",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
-      "steppedLine": true,
+      "steppedLine": false,
       "targets": [
         {
-          "expr": "up{job=\"mixnetnode\"}",
+          "expr": "rate(nginx_connections_accepted[1m])",
           "interval": "",
           "legendFormat": "{{job}}",
           "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Mix Node Uptime",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:117",
-          "decimals": 0,
-          "format": "short",
-          "label": "Up Time",
-          "logBase": 1,
-          "max": "1.1",
-          "min": "0",
-          "show": true
         },
         {
-          "$$hashKey": "object:118",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "*commands.GetConsensus": "dark-green"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 10,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "hiddenSeries": false,
-      "id": 39,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pluginVersion": "7.1.0",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "increase(katzenpost_incoming_conn_incoming_requests_total{job=\"mixnetnode\", command=\"*commands.GetConsensus\"}[1m])",
+          "expr": "rate(nginx_connections_active[1m])",
           "interval": "",
-          "legendFormat": "{{command}}",
-          "refId": "A"
+          "legendFormat": "{{job}}",
+          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Get Consensus Documents Calls / Min",
+      "title": "Connections Accepted/1m + Connections Active/1m",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -191,7 +95,6 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:194",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -200,7 +103,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:195",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -222,21 +124,118 @@
       "datasource": null,
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "links": []
+          "custom": {}
         },
         "overrides": []
       },
-      "fill": 4,
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 13,
+        "w": 11,
+        "x": 13,
+        "y": 0
+      },
+      "hiddenSeries": false,
+      "id": 50,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "percentage": false,
+      "pluginVersion": "7.1.5",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "rate(nginx_connections_accepted[5m])",
+          "interval": "",
+          "legendFormat": "{{job}}",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(nginx_connections_active[5m])",
+          "interval": "",
+          "legendFormat": "{{job}}",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Connections Accepted/5m + Connections Active/5m",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
       "fillGradient": 0,
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 13
       },
       "hiddenSeries": false,
-      "id": 37,
+      "id": 47,
       "legend": {
         "avg": false,
         "current": false,
@@ -250,7 +249,7 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.0",
+      "pluginVersion": "7.1.5",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -260,9 +259,9 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(katzenpost_incoming_conn_incoming_requests_total{job=\"mixnetnode\"}[1m])",
+          "expr": "rate(engine_daemon_container_actions_seconds_sum[1m])",
           "interval": "",
-          "legendFormat": "{{job}} {{command}} ",
+          "legendFormat": "{{action}}",
           "refId": "A"
         }
       ],
@@ -270,7 +269,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Connections Types / Min",
+      "title": "Panel Title",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -286,7 +285,6 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:88",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -295,7 +293,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:89",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -317,8 +314,7 @@
       "datasource": null,
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "links": []
+          "custom": {}
         },
         "overrides": []
       },
@@ -328,204 +324,10 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 13
       },
       "hiddenSeries": false,
-      "id": 27,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pluginVersion": "7.1.0",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "increase(katzenpost_kaetzchen_requests_total{job=\"mixnetnode\"}[5m])",
-          "interval": "",
-          "legendFormat": "{{job}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Client Requests / 5 Minutes",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1307",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1308",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "mixnetnode": "dark-orange"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 3,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 16
-      },
-      "hiddenSeries": false,
-      "id": 34,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": false,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 2,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pluginVersion": "7.1.0",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "increase(katzenpost_scheduler_mix_queue_size_sum{job=\"mixnetnode\"}[1m])",
-          "interval": "",
-          "legendFormat": "{{job}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Mixnet Queue Size / Min",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:2004",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:2005",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "mixnetnode": "semi-dark-red"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 3,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 16
-      },
-      "hiddenSeries": false,
-      "id": 35,
+      "id": 49,
       "legend": {
         "avg": false,
         "current": false,
@@ -539,7 +341,7 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.0",
+      "pluginVersion": "7.1.5",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -549,289 +351,34 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(katzenpost_kaetzchen_requests_total{job=\"mixnetnode\"}[1h])",
-          "interval": "",
-          "legendFormat": "{{job}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Client Requests / 1 H",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1307",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1308",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "mixnetnode": "super-light-red"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 0,
-        "y": 24
-      },
-      "hiddenSeries": false,
-      "id": 31,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pluginVersion": "7.1.0",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "increase(katzenpost_kaetzchen_requests_duration_seconds_sum{job=\"mixnetnode\"}[1m])",
-          "interval": "",
-          "legendFormat": "{{job}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Client's Request Duration / Min",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:1567",
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:1568",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "dark-red",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 4,
-        "x": 8,
-        "y": 24
-      },
-      "id": 16,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["max"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.1.0",
-      "targets": [
-        {
-          "expr": "katzenpost_provider_dropped_packets_total{job=\"mixnetnode\"}",
+          "expr": "nginx_up",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
         }
       ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Dropped Packets Total",
-      "type": "stat"
-    },
-    {
-      "aliasColors": {},
-      "bars": true,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "decimals": 0,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 0,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 12,
-        "x": 12,
-        "y": 24
-      },
-      "hiddenSeries": false,
-      "id": 25,
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": true,
-        "hideEmpty": true,
-        "hideZero": true,
-        "max": false,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "sort": "current",
-        "sortDesc": true,
-        "total": false,
-        "values": true
-      },
-      "lines": false,
-      "linewidth": 1,
-      "nullPointMode": "null as zero",
-      "percentage": false,
-      "pluginVersion": "7.1.0",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": " sum(katzenpost_pki_failed_fetch_pki_docs_per_epoch_total{epoch=~\"^[8-9][0-9]+\", job=\"mixnetnode\"}) by (epoch)",
-          "format": "time_series",
-          "interval": "",
-          "legendFormat": "{{epoch}}",
-          "refId": "A"
-        }
-      ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Epoch Above 80000 Failed PKI Fetch  Provider-0",
+      "title": "Nginx UP",
       "tooltip": {
-        "shared": false,
-        "sort": 2,
+        "shared": true,
+        "sort": 0,
         "value_type": "individual"
       },
-      "transformations": [],
       "type": "graph",
       "xaxis": {
         "buckets": null,
-        "min": null,
-        "mode": "series",
+        "mode": "time",
         "name": null,
-        "show": false,
-        "values": ["max"]
+        "show": true,
+        "values": []
       },
       "yaxes": [
         {
-          "decimals": null,
           "format": "short",
-          "label": "Failed Requests",
+          "label": null,
           "logBase": 1,
           "max": null,
           "min": null,
@@ -843,115 +390,13 @@
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": false
+          "show": true
         }
       ],
       "yaxis": {
         "align": false,
         "alignLevel": null
       }
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "light-blue",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 4,
-        "x": 8,
-        "y": 27
-      },
-      "id": 14,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": ["max"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.1.0",
-      "targets": [
-        {
-          "expr": "katzenpost_kaetzchen_requests_total{job=\"mixnetnode\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Provider-0 Requests Total",
-      "type": "stat"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "light-blue",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 4,
-        "x": 8,
-        "y": 30
-      },
-      "id": 32,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": ["max"],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.1.0",
-      "targets": [
-        {
-          "expr": "katzenpost_outgoing_conn_outgoing_connections_total{job=\"mixnetnode\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Outgoing Connections Total",
-      "type": "stat"
     },
     {
       "aliasColors": {},
@@ -962,8 +407,7 @@
       "description": "This show better data once you expose docker metrics: https://blog.sebas.tech/blog/docker-prometheus-ufw\n\nYou also need to open port 9323",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "links": []
+          "custom": {}
         },
         "overrides": []
       },
@@ -972,8 +416,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 33
+        "x": 12,
+        "y": 21
       },
       "hiddenSeries": false,
       "id": 29,
@@ -990,7 +434,7 @@
       "linewidth": 1,
       "nullPointMode": "null",
       "percentage": false,
-      "pluginVersion": "7.1.0",
+      "pluginVersion": "7.1.5",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1006,12 +450,6 @@
           "refId": "C"
         },
         {
-          "expr": "go_memstats_sys_bytes{job=\"mixnetnode\"}",
-          "interval": "",
-          "legendFormat": "{{job}}",
-          "refId": "A"
-        },
-        {
           "expr": "engine_daemon_engine_memory_bytes{job=\"docker_host\"}",
           "interval": "",
           "intervalFactor": 1,
@@ -1023,7 +461,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Memory Usage",
+      "title": "Memory Usage of Host",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1039,7 +477,6 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:1399",
           "format": "decbytes",
           "label": null,
           "logBase": 1,
@@ -1048,7 +485,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:1400",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -1063,7 +499,7 @@
       }
     }
   ],
-  "refresh": "30s",
+  "refresh": false,
   "schemaVersion": 26,
   "style": "dark",
   "tags": [],
@@ -1071,7 +507,7 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -1090,5 +526,5 @@
   "timezone": "",
   "title": "Sysadmin Dashboard",
   "uid": "asdkj3Adc",
-  "version": 11
+  "version": 13
 }
