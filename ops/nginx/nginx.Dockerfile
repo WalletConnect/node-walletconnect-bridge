@@ -5,6 +5,7 @@ RUN apk add --update --no-cache certbot openssl bash && \
   ln -fs /dev/stdout /var/log/nginx/error.log
 
 COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./letsencrypt.conf /etc/nginx/letsencrypt.conf
 COPY ./dhparams.pem /etc/ssl/dhparams.pem
 COPY ./entry.sh /root/entry.sh
 
