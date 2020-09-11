@@ -47,7 +47,7 @@ function makeCert () {
   fi
   if [[ "$fullDomain" != "localhost" ]]
   then
-    echo "Forking renewcerts to the background..."
+    echo "Forking renewcerts to the background for $fullDomain..."
     renewcerts $fullDomain &
   fi
 }
@@ -78,6 +78,7 @@ function configSubDomain () {
 server {
   listen  80;
   server_name $fullDomain;
+  include /etc/nginx/letsencrypt.conf;
   location / {
     return 301 https://\$host\$request_uri;
   }
@@ -127,6 +128,7 @@ function configRootDomain () {
 server {
   listen 80;
   server_name $domain;
+  include /etc/nginx/letsencrypt.conf;
   location / {
     return 301 https://\$host\$request_uri;
   }
@@ -166,7 +168,7 @@ function renewcerts {
   domain=$1
   while true
   do
-    printf "Preparing to renew certs... "
+    printf "Preparing to renew certs for $domain "
     if [[ -d "$LETSENCRYPT/$domain" ]]
     then
       printf "Found certs to renew for $domain... "
@@ -188,6 +190,7 @@ function main () {
   # Setup SSL Certs
   mkdir -p $LETSENCRYPT
   mkdir -p $SERVERS
+  mkdir -p /var/www/letsencrypt
 
   for container_port in $docker_containers; do
     port=$(echo $container_port | cut -d':' -f 2)
