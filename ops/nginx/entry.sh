@@ -9,6 +9,7 @@ app_container_dns_name="${CONTAINER_NAME}"
 app_env="${APP_ENV:-development}"
 app_port="${APP_PORT:-5001}"
 app_qty="${APP_QTY:-5}"
+cloudflareEnabled=${CLOUDFLARE:-false}
 
 echo
 echo "
@@ -38,8 +39,13 @@ function makeCert () {
   then
     echo "Couldn't find certs for $fullDomain, using certbot to initialize those now.."
     
-    echo "dns_cloudflare_api_token = $(cat /run/secrets/walletconnect_cloudflare)" > /run/secrets/cloudflare.ini
-    certbot certonly --dns-cloudflare --dns-cloudflare-credentials /run/secrets/cloudflare.ini -d $fullDomain -m $email --agree-tos --no-eff-email -n
+    if [[ "$cloudflareEnabled" == false ]]; then
+      certbot certonly --standalone -m $email --agree-tos --no-eff-email -d $fullDomain -n
+    else
+      echo "dns_cloudflare_api_token = $(cat /run/secrets/walletconnect_cloudflare)" > /run/secrets/cloudflare.ini
+      certbot certonly --dns-cloudflare --dns-cloudflare-credentials /run/secrets/cloudflare.ini -d $fullDomain -m $email --agree-tos --no-eff-email -n
+    fi
+
     if [[ ! $? -eq 0 ]] 
     then
       echo "ERROR"

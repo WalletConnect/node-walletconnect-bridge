@@ -9,6 +9,7 @@ services:
       CONTAINER_NAME: node
       APP_PORT: 5000
       APP_QTY: 5
+      CLOUDFLARE: ${CLOUDFLARE}
     depends_on:
       - node0
       - node1
