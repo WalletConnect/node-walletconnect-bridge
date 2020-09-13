@@ -37,18 +37,15 @@ function makeCert () {
   if [[ ! -f "$certpath/privkey.pem" ]]
   then
     echo "Couldn't find certs for $fullDomain, using certbot to initialize those now.."
-    certbot certonly --standalone -m $email --agree-tos --no-eff-email -d $fullDomain -n
+    
+    echo "dns_cloudflare_api_token = $(cat /run/secrets/walletconnect_cloudflare)" > /run/secrets/cloudflare.ini
+    certbot certonly --dns-cloudflare --dns-cloudflare-credentials /run/secrets/cloudflare.ini -d $fullDomain -m $email --agree-tos --no-eff-email -n
     if [[ ! $? -eq 0 ]] 
     then
       echo "ERROR"
       echo "Sleeping to not piss off certbot"
       sleep 9999 # FREEZE! Don't pester eff & get throttled
     fi
-  fi
-  if [[ "$fullDomain" != "localhost" ]]
-  then
-    echo "Forking renewcerts to the background for $fullDomain..."
-    renewcerts $fullDomain &
   fi
 }
 
@@ -166,14 +163,10 @@ EOF
 # periodically fork off & see if our certs need to be renewed
 function renewcerts {
   domain=$1
-  while true
-  do
-    printf "Preparing to renew certs for $domain "
-    if [[ -d "$LETSENCRYPT/$domain" ]]
+  while true; do
+    if [[ -d "$LETSENCRYPT" ]]
     then
-      printf "Found certs to renew for $domain... "
       certbot renew --webroot -w /var/www/letsencrypt/ -n
-      echo "Done!"
     fi
     sleep 48h
   done
@@ -208,6 +201,11 @@ function main () {
       $app_container_dns_name
   fi
 
+  if [[ "$fullDomain" != "localhost" ]]
+  then
+    echo "Forking renewcerts to the background for $fullDomain..."
+    renewcerts $fullDomain &
+  fi
 
   sleep 4 # give renewcerts a sec to do it's first check
 

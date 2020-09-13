@@ -7,9 +7,6 @@ redisImage='redis:5-alpine'
 nginxImage='$(project)/nginx:$(BRANCH)'
 walletConnectImage='$(project)/bridge:$(BRANCH)'
 
-BRIDGE_URL=$(shell cat config | grep BRIDGE_URL | cut -f2 -d=)
-CERTBOT_EMAIL=$(shell cat config | grep CERTBOT_EMAIL | cut -f2 -d=)
-
 ### Makefile internal coordination
 flags=.makeFlags
 VPATH=$(flags)
@@ -43,6 +40,8 @@ setup:
 	echo "BRIDGE_URL="$$bridge > config
 	@read -p 'Email for SSL certificate (default noreply@gmail.com): ' email; \
 	echo "CERTBOT_EMAIL="$$email >> config
+	@read -p 'Is your DNS configured with cloudflare proxy? [y/N]: ' cf; \
+	echo "CLOUDFLARE="$${cf:-false} >> config
 	@touch $(flags)/$@
 	@echo "MAKE: Done with $@"
 	@echo
@@ -82,26 +81,28 @@ dev: build
 	@echo  "MAKE: Done with $@"
 	@echo
 
-deploy: setup build
-	WALLET_IMAGE=$(walletConnectImage) \
-	NGINX_IMAGE=$(nginxImage) \
-	BRIDGE_URL=$(BRIDGE_URL) \
-	CERTBOT_EMAIL=$(CERTBOT_EMAIL) \
-	docker stack deploy -c ops/docker-compose.yml \
-	-c ops/docker-compose.prod.yml $(project)
+cloudflare: setup
+	bash ops/cloudflare-secret.sh $(project)
+	@touch $(flags)/$@
 	@echo  "MAKE: Done with $@"
 	@echo
 
-deploy-monitoring: setup build
-	 WALLET_IMAGE=$(walletConnectImage) \
-	 NGINX_IMAGE=$(nginxImage) \
-	 BRIDGE_URL=$(BRIDGE_URL) \
-	 CERTBOT_EMAIL=$(CERTBOT_EMAIL) \
-	 docker stack deploy -c ops/docker-compose.yml \
-	 -c ops/docker-compose.prod.yml \
-	 -c ops/docker-compose.monitor.yml $(project)
-	 @echo  "MAKE: Done with $@"
-	 @echo
+deploy: setup build cloudflare
+	WALLET_IMAGE=$(walletConnectImage) \
+	NGINX_IMAGE=$(nginxImage) \
+	PROJECT=$(project) \
+	bash ops/deploy.sh
+	@echo  "MAKE: Done with $@"
+	@echo
+
+deploy-monitoring: setup build cloudflare
+	WALLET_IMAGE=$(walletConnectImage) \
+	NGINX_IMAGE=$(nginxImage) \
+	PROJECT=$(project) \
+	MONITORING=true \
+	bash ops/deploy.sh
+	@echo  "MAKE: Done with $@"
+	@echo
 
 down: stop
 
