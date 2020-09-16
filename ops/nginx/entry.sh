@@ -142,18 +142,11 @@ server {
   # https://stackoverflow.com/questions/35744650/docker-network-nginx-resolver
   resolver 127.0.0.11 valid=30s;
  
-  ssl_dhparam               /etc/ssl/dhparams.pem;
   ssl_certificate           $LETSENCRYPT/$domain/fullchain.pem;
   ssl_certificate_key       $LETSENCRYPT/$domain/privkey.pem;
-  ssl_session_cache         shared:SSL:4m;  # This is size not duration
-  ssl_session_timeout       1m;
-  ssl_protocols             TLSv1.2 TLSv1.3; 
-  ssl_prefer_server_ciphers on;
-  ssl_ecdh_curve            secp384r1;
-  ssl_ciphers 'ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384';
 
   location / {
-      proxy_read_timeout      30;
+      proxy_read_timeout      90;
       proxy_http_version      1.1;
       proxy_set_header        Upgrade \$http_upgrade;
       proxy_set_header        Connection "Upgrade";
