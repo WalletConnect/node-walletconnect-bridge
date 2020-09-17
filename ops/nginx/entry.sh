@@ -80,6 +80,7 @@ function configSubDomain () {
   cat - > "$SERVERS/$fullDomain.conf" <<EOF
 server {
   listen  80;
+  listen [::]:80;
   server_name $fullDomain;
   include /etc/nginx/letsencrypt.conf;
   location / {
@@ -88,6 +89,7 @@ server {
 }
 server {
   listen  443 ssl;
+  listen [::]:443 ssl;
   ssl_certificate       $LETSENCRYPT/$fullDomain/fullchain.pem;
   ssl_certificate_key   $LETSENCRYPT/$fullDomain/privkey.pem;
   server_name $fullDomain;
@@ -130,6 +132,7 @@ function configRootDomain () {
   cat - > $configPath <<EOF
 server {
   listen 80;
+  listen [::]:80;
   server_name $domain;
   include /etc/nginx/letsencrypt.conf;
   location / {
@@ -138,6 +141,7 @@ server {
 }
 server {
   listen 443 ssl;
+  listen [::]:443 ssl;
   server_name $domain;
   # https://stackoverflow.com/questions/35744650/docker-network-nginx-resolver
   resolver 127.0.0.11 valid=30s;
@@ -146,14 +150,27 @@ server {
   ssl_certificate_key       $LETSENCRYPT/$domain/privkey.pem;
 
   location / {
-      proxy_read_timeout      90;
-      proxy_http_version      1.1;
-      proxy_set_header        Upgrade \$http_upgrade;
-      proxy_set_header        Connection "Upgrade";
-      proxy_set_header        Host \$host;
-      proxy_set_header        http_x_forwarded_for  \$remote_addr;
-      set \$upstream bridge;
-      proxy_pass              http://app;
+    proxy_read_timeout      90;
+    proxy_http_version      1.1;
+    proxy_set_header        Upgrade \$http_upgrade;
+    proxy_set_header        Connection "Upgrade";
+    proxy_set_header        Host \$host;
+    proxy_set_header        http_x_forwarded_for  \$remote_addr;
+    set \$upstream bridge;
+    proxy_pass              http://app;
+  
+   # Simple requests
+    if (\$request_method ~* "(GET|POST)") {
+        add_header "Access-Control-Allow-Origin"  *;
+    }
+
+    # Preflighted requests
+    if (\$request_method = OPTIONS ) {
+        add_header "Access-Control-Allow-Origin"  *;
+        add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, HEAD";
+        add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Requested-With, Content-Type, Accept";
+        return 200;
+    }
   }
 }
 EOF
