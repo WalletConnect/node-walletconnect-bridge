@@ -146,7 +146,7 @@ upgrade: setup
 	docker service update --force $(project)_redis
 
 reset:
-	$(MAKE) clean
+	$(MAKE) clean-all
 	rm -f config
 	@echo  "MAKE: Done with $@"
 	@echo
