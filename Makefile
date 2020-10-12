@@ -14,20 +14,39 @@ VPATH=$(flags)
 $(shell mkdir -p $(flags))
 
 .PHONY: all clean default
+define DEFAULT_TEXT
+Available make rules:
+
+pull:\tdownloads docker images
+
+setup:\tconfigures domain an certbot email
+
+build:\tbuilds docker images
+
+dev:\truns local docker stack with open ports
+
+deploy:\tdeploys to production
+
+deploy-monitoring:
+\tdeploys to production with grafana
+
+cloudflare: asks for a cloudflare DNS api and creates a docker secret
+
+stop:\tstops all walletconnect docker stacks
+
+upgrade:
+\tpulls from remote git. Builds the containers and updates each individual
+\tcontainer currently running with the new version that was just built.
+
+clean:\tcleans current docker build
+
+reset:\treset local config
+endef
 
 ### Rules
+export DEFAULT_TEXT
 default:
-	@echo
-	@echo "Available make rules: "
-	@echo "pull:          pulls docker images"
-	@echo "setup:         configures domain an certbot email"
-	@echo "build:         builds docker images"
-	@echo "dev:           runs local docker stack with open ports"
-	@echo "deploy:        deploys to production"
-	@echo "stop:          stops all walletconnect docker stacks"
-	@echo "upgrade:       Pulls from remote git. Builds the containers and updates each individual container currently running with the new version taht was just built."
-	@echo "clean:         cleans current docker build"
-	@echo "reset:         reset local config"
+	@echo -e "$$DEFAULT_TEXT"
 
 pull:
 	docker pull $(redisImage)
@@ -127,7 +146,7 @@ upgrade: setup
 	docker service update --force $(project)_redis
 
 reset:
-	rm -rf .makeFlags
+	$(MAKE) clean
 	rm -f config
 	@echo  "MAKE: Done with $@"
 	@echo
