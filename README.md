@@ -41,6 +41,25 @@ Bridge URL domain: <your bridge domain>
 Email for SSL certificate (default noreply@gmail.com):
 ```
 
+#### Additional Monitoring with Grafana
+
+If you want a grafana dashboard you can use the following commands:
+
+```bash
+git clone https://github.com/WalletConnect/node-walletconnect-bridge
+cd node-walletconnect-bridge
+make deploy-monitoring
+Bridge URL domain: <your bridge domain>
+Email for SSL certificate (default noreply@gmail.com):
+```
+
+For this to work you must point grafana.`<bridge domain>` to the same ip as `<bridge domain>`.
+
+#### Cloudflare Support
+
+The config step of the Makefile will ask you whether you are using cloudflare as a DNS proxy for your bridge domain. If you answer yes then the certbot will need a Cloudflare api topken that can be obtain from: https://dash.cloudflare.com/profile/api-tokens. The type of token you need is a `Edit zone DNS` with access to the bridge domain.
+
+The API token will be safeguarded with a `docker secret`.
 
 ### Upgrading ⏫
 

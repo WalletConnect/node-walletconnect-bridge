@@ -3,7 +3,6 @@ project=${1}
 secretName="${project}_cloudflare"
 
 cloudflare=$(grep CLOUDFLARE config | cut -f2 -d=)
-echo "MUA $cloudflare"
 case $cloudflare in
   false | "N" | "NO" | "No" | "no" | "n" )
     cloudflare=false
@@ -13,7 +12,6 @@ case $cloudflare in
     ;;
 esac
 
-echo "ME $cloudflare"
 if [[ $cloudflare == false ]];then
   sed -i 's/^CLOUDFLARE=.$/CLOUDFLARE=false/g' config
 else

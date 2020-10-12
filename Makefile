@@ -123,10 +123,6 @@ upgrade: setup
 	git fetch origin $(BRANCH)
 	git merge origin/$(BRANCH)
 	docker service update --force $(project)_node0
-	docker service update --force $(project)_node1
-	docker service update --force $(project)_node2
-	docker service update --force $(project)_node3
-	docker service update --force $(project)_node4
 	docker service update --force $(project)_nginx
 	docker service update --force $(project)_redis
 
