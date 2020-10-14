@@ -14,6 +14,7 @@ services:
       SUBDOMAINS: "grafana:3000"
     depends_on:
       - grafana
+      - exporter
     volumes:
       - ./nginx/exporter.conf:/etc/nginx/servers/exporter.conf
 

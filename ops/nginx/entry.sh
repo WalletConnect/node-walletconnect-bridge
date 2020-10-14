@@ -9,9 +9,10 @@ app_container_dns_name="${CONTAINER_NAME}"
 app_env="${APP_ENV:-development}"
 app_port="${APP_PORT:-5001}"
 app_qty="${APP_QTY:-5}"
-cloudflareEnabled=${CLOUDFLARE:-false}
 
-echo
+LETSENCRYPT=/etc/letsencrypt/live
+SERVERS=/etc/nginx/servers
+
 echo "
 USING ENVVARS:
 root_domain=$root_domain
@@ -21,25 +22,21 @@ app_env=$app_env
 app_port=$app_port
 app_qty=$app_qty
 "
-echo
-
-LETSENCRYPT=/etc/letsencrypt/live
-SERVERS=/etc/nginx/servers
 
 function makeCert () {
   fullDomain=$1
-  certpath=$2
-  if [[ "$fullDomain" == "localhost" && ! -f "$certpath/privkey.pem" ]]
+  certDirectory=$2
+  if [[ "$fullDomain" =~ .*localhost.* && ! -f "$certDirectory/privkey.pem" ]]
   then
     echo "Developing locally, generating self-signed certs"
-    openssl req -x509 -newkey rsa:4096 -keyout $certpath/privkey.pem -out $certpath/fullchain.pem -days 365 -nodes -subj '/CN=localhost'
+    openssl req -x509 -newkey rsa:4096 -keyout $certDirectory/privkey.pem -out $certDirectory/fullchain.pem -days 365 -nodes -subj '/CN=localhost'
   fi
 
-  if [[ ! -f "$certpath/privkey.pem" ]]
+  if [[ ! -f "$certDirectory/privkey.pem" ]]
   then
     echo "Couldn't find certs for $fullDomain, using certbot to initialize those now.."
     
-    if [[ "$cloudflareEnabled" == false ]]; then
+    if [[ "${CLOUDFLARE:-false}" == false ]]; then
       certbot certonly --standalone -m $email --agree-tos --no-eff-email -d $fullDomain -n
     else
       echo "dns_cloudflare_api_token = $(cat /run/secrets/walletconnect_cloudflare)" > /run/secrets/cloudflare.ini
@@ -75,8 +72,10 @@ function configSubDomain () {
   dockerPort=$2
   rootDomain=$3
   fullDomain=$subDomain.$rootDomain
-  echo "Full subdomain: $fullDomain"
-  makeCert "$fullDomain" "$LETSENCRYPT/$rootDomain"
+  echo "Configuring Subdomain: $fullDomain"
+  certDirectory=$LETSENCRYPT/$fullDomain
+  mkdir -vp $certDirectory
+  makeCert "$fullDomain" $certDirectory
   cat - > "$SERVERS/$fullDomain.conf" <<EOF
 server {
   listen  80;
@@ -90,8 +89,8 @@ server {
 server {
   listen  443 ssl;
   listen [::]:443 ssl;
-  ssl_certificate       $LETSENCRYPT/$fullDomain/fullchain.pem;
-  ssl_certificate_key   $LETSENCRYPT/$fullDomain/privkey.pem;
+  ssl_certificate       $certDirectory/fullchain.pem;
+  ssl_certificate_key   $certDirectory/privkey.pem;
   server_name $fullDomain;
   location / {
 		proxy_pass "http://$subDomain:$dockerPort";
@@ -126,8 +125,10 @@ EOF
 
 function configRootDomain () {
   domain=$1
-  printf "\nROOT DOMAIN: $domain\n"
-  makeCert $domain $LETSENCRYPT/$domain
+  printf "\nConfiguring root domain: $domain\n"
+  certDirectory=$LETSENCRYPT/$domain
+  mkdir -vp $certDirectory
+  makeCert $domain $certDirectory
   configPath="$SERVERS/$domain.conf"
   cat - > $configPath <<EOF
 server {
@@ -146,8 +147,8 @@ server {
   # https://stackoverflow.com/questions/35744650/docker-network-nginx-resolver
   resolver 127.0.0.11 valid=30s;
  
-  ssl_certificate           $LETSENCRYPT/$domain/fullchain.pem;
-  ssl_certificate_key       $LETSENCRYPT/$domain/privkey.pem;
+  ssl_certificate           $certDirectory/fullchain.pem;
+  ssl_certificate_key       $certDirectory/privkey.pem;
 
   location / {
     proxy_read_timeout      90;
@@ -188,18 +189,11 @@ function renewcerts {
   done
 }
 
-function checkDNS () {
-  domain=$1
-  # TODO
-  # Use netcat to check whether it can be connected to
-  # at the address nslookup
-}
-
 function main () {
-  # Setup SSL Certs
-  mkdir -p $LETSENCRYPT
-  mkdir -p $SERVERS
-  mkdir -p /var/www/letsencrypt
+
+  mkdir -vp $LETSENCRYPT
+  mkdir -vp $SERVERS
+  mkdir -vp /var/www/letsencrypt
 
   for container_port in $docker_containers; do
     port=$(echo $container_port | cut -d':' -f 2)

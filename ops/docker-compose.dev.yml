@@ -4,6 +4,12 @@ services:
   redis:
     ports:
       - "6379:6379"
-  node:
+  node0:
     ports:
       - "5001:5001"
+  nginx:
+    environment:
+      CONTAINER_NAME: node
+      APP_QTY: 1
+    depends_on:
+      - node0
