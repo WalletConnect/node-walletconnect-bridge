@@ -1,0 +1,26 @@
+
+global:
+  scrape_interval: 5s
+  scrape_timeout: 5s
+  evaluation_interval: 5s
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: []
+    scheme: http
+    timeout: 5s
+scrape_configs:
+
+- job_name: docker_host
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - 172.18.0.1:9323
+
+- job_name: nginx_exporter
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - "exporter:9113"

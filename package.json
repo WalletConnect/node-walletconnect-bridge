@@ -13,12 +13,13 @@
   "homepage": "https://walletconnect.org",
   "license": "LGPL-3.0",
   "dependencies": {
-    "axios": "^0.19.0",
-    "bluebird": "^3.5.5",
-    "fastify": "^2.4.1",
-    "fastify-helmet": "^3.0.0",
+    "axios": "^0.19.2",
+    "bluebird": "^3.7.2",
+    "fastify": "^2.15.3",
+    "fastify-helmet": "^3.0.2",
+    "pino-pretty": "^4.2.1",
     "redis": "^2.8.0",
-    "ws": "^7.0.0"
+    "ws": "^7.3.1"
   },
   "scripts": {
     "build": "babel ./src --extensions '.ts' --out-dir ./build",
@@ -33,28 +34,28 @@
     "url": "https://github.com/walletconnect/node-walletconnect-bridge/issues"
   },
   "devDependencies": {
-    "@babel/cli": "^7.4.4",
-    "@babel/core": "^7.4.5",
-    "@babel/node": "^7.4.5",
-    "@babel/polyfill": "^7.4.4",
-    "@babel/preset-env": "^7.5.5",
-    "@babel/preset-typescript": "^7.1.0",
-    "@babel/register": "^7.0.0",
+    "@babel/cli": "^7.11.6",
+    "@babel/core": "^7.11.6",
+    "@babel/node": "^7.10.5",
+    "@babel/polyfill": "^7.11.5",
+    "@babel/preset-env": "^7.11.5",
+    "@babel/preset-typescript": "^7.10.4",
+    "@babel/register": "^7.11.5",
     "@types/axios": "^0.14.0",
-    "@types/bluebird": "^3.5.27",
-    "@types/core-js": "^2.5.2",
-    "@types/node": "^12.0.8",
-    "@types/redis": "^2.8.13",
-    "@types/ws": "^6.0.1",
-    "core-js": "^3.2.1",
+    "@types/bluebird": "^3.5.32",
+    "@types/core-js": "^2.5.3",
+    "@types/node": "^12.12.55",
+    "@types/redis": "^2.8.27",
+    "@types/ws": "^6.0.4",
+    "core-js": "^3.6.5",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
-    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
-    "tslint": "^5.11.0",
+    "tslint": "^5.20.1",
     "tslint-config-standard": "^8.0.1",
-    "typescript": "^3.1.3"
+    "typescript": "^3.9.7"
   }
 }
