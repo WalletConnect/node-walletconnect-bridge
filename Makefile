@@ -90,7 +90,7 @@ build: pull build-node build-nginx
 	@echo  "MAKE: Done with $@"
 	@echo
 
-dev: build
+dev: pull build
 	WALLET_IMAGE=$(walletConnectImage) \
 	NGINX_IMAGE=$(nginxImage) \
 	docker stack deploy \
@@ -99,6 +99,22 @@ dev: build
 	dev_$(project)
 	@echo  "MAKE: Done with $@"
 	@echo
+
+dev-monitoring: pull build
+	WALLET_IMAGE=$(walletConnectImage) \
+	NGINX_IMAGE=$(nginxImage) \
+	docker stack deploy \
+	-c ops/docker-compose.yml \
+	-c ops/docker-compose.dev.yml \
+	-c ops/docker-compose.monitor.yml \
+	dev_$(project)
+	@echo  "MAKE: Done with $@"
+	@echo
+
+redeploy: 
+	$(MAKE) clean
+	$(MAKE) down
+	$(MAKE) dev-monitoring
 
 cloudflare: setup
 	bash ops/cloudflare-secret.sh $(project)
