@@ -70,9 +70,10 @@ app.ready(() => {
     })
 
     socket.on("error", (e: Error) => {
-      if (e.message != "Invalid WebSocket frame: invalid payload length 126") {
+      if (!e.message.includes("Invalid WebSocket frame")) {
         throw e
       }
+      app.log.warn({type: e.name, message: e.message})
     })
   })
 

@@ -3,10 +3,10 @@ version: '3.7'
 services:
   redis:
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
   node0:
     ports:
-      - "5001:5001"
+      - "127.0.0.1:5001:5001"
     volumes:
       - ../build:/root/build
   nginx:
