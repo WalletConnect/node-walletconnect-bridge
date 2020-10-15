@@ -68,6 +68,12 @@ app.ready(() => {
     socket.on('pong', () => {
       socket.isAlive = true
     })
+
+    socket.on("error", (e: Error) => {
+      if (e.message != "Invalid WebSocket frame: invalid payload length 126") {
+        throw e
+      }
+    })
   })
 
   setInterval(
