@@ -14,7 +14,6 @@ services:
       SUBDOMAINS: "grafana:3000"
     depends_on:
       - grafana
-      - exporter
     volumes:
       - ./nginx/exporter.conf:/etc/nginx/servers/exporter.conf
 
@@ -24,10 +23,18 @@ services:
       - -nginx.scrape-uri
       - http://nginx:8080/stub_status
 
+  node_exporter:
+    image: quay.io/prometheus/node-exporter 
+    volumes:
+      - /:/host:ro,rslave
+    command:
+      - '--path.rootfs=/host'
+
   prometheus:
-    image: prom/prometheus
+    image: quay.io/prometheus/prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus:/prometheus
 
   grafana:
     image: grafana/grafana
