@@ -15,50 +15,10 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 1,
   "links": [],
   "panels": [
     {
-      "alert": {
-        "alertRuleTags": {},
-        "conditions": [
-          {
-            "evaluator": {
-              "params": [
-                1
-              ],
-              "type": "gt"
-            },
-            "operator": {
-              "type": "and"
-            },
-            "query": {
-              "params": [
-                "D",
-                "10s",
-                "now"
-              ]
-            },
-            "reducer": {
-              "params": [],
-              "type": "last"
-            },
-            "type": "query"
-          }
-        ],
-        "executionErrorState": "alerting",
-        "for": "1s",
-        "frequency": "1s",
-        "handler": 1,
-        "message": "A container start action was just executed",
-        "name": "Container starts",
-        "noDataState": "no_data",
-        "notifications": [
-          {
-            "uid": "KCxFywcGz"
-          }
-        ]
-      },
       "aliasColors": {
         "container start": "dark-red",
         "nginx connections active": "dark-green",
@@ -67,7 +27,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus",
+      "datasource": null,
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -141,15 +101,7 @@
           "refId": "C"
         }
       ],
-      "thresholds": [
-        {
-          "colorMode": "critical",
-          "fill": true,
-          "line": true,
-          "op": "gt",
-          "value": 1
-        }
-      ],
+      "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
@@ -169,6 +121,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:112",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -177,6 +130,7 @@
           "show": false
         },
         {
+          "$$hashKey": "object:113",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -195,14 +149,14 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus",
+      "datasource": null,
       "fieldConfig": {
         "defaults": {
           "custom": {}
         },
         "overrides": []
       },
-      "fill": 1,
+      "fill": 0,
       "fillGradient": 0,
       "gridPos": {
         "h": 13,
@@ -222,7 +176,7 @@
         "values": false
       },
       "lines": true,
-      "linewidth": 1,
+      "linewidth": 2,
       "nullPointMode": "null",
       "options": {
         "alertThreshold": true
@@ -238,15 +192,39 @@
       "steppedLine": false,
       "targets": [
         {
+          "expr": "rate(nginx_connections_writing[5m])",
+          "interval": "",
+          "legendFormat": "writing",
+          "refId": "E"
+        },
+        {
+          "expr": "rate(nginx_connections_waiting[5m])",
+          "interval": "",
+          "legendFormat": "waiting",
+          "refId": "D"
+        },
+        {
+          "expr": "rate(nginx_connections_handled[5m])",
+          "interval": "",
+          "legendFormat": "handled",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(nginx_connections_reading[5m])",
+          "interval": "",
+          "legendFormat": "reading",
+          "refId": "F"
+        },
+        {
           "expr": "rate(nginx_connections_accepted[5m])",
           "interval": "",
-          "legendFormat": "{{job}}",
+          "legendFormat": "accepted",
           "refId": "A"
         },
         {
           "expr": "rate(nginx_connections_active[5m])",
           "interval": "",
-          "legendFormat": "{{job}}",
+          "legendFormat": "active",
           "refId": "B"
         }
       ],
@@ -270,6 +248,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:112",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -278,6 +257,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:113",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -296,7 +276,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus",
+      "datasource": null,
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -395,7 +375,7 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -412,7 +392,7 @@
     ]
   },
   "timezone": "",
-  "title": "Sysadmin Dashboard",
+  "title": "Nginx Dashboard",
   "uid": "asdkj3Adc",
-  "version": 2
+  "version": 31
 }
