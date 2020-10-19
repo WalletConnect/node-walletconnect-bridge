@@ -115,10 +115,14 @@ upstream app {
 # does and the production server uri of "" (no uri).
 # This allows us to to test the stress and to make it work for
 # the production environment
-  hash    \$request_uri\$http_user_agent\$remote_addr consistent;
+#  hash    \$request_uri\$http_user_agent\$remote_addr consistent;
 EOF
   for i in $(seq 0 $((appQty - 1))); do
-    echo "server $dockerContainerName$i:$port;" >> $configPath
+    if [[ $i == 0 ]]; then
+      echo "server $dockerContainerName$i:$port max_fails=1 fail_timeout=5s;" >> $configPath
+    else
+      echo "server $dockerContainerName$i:$port backup;" >> $configPath
+    fi
   done
   echo "}" >> $configPath
 }
@@ -151,7 +155,7 @@ server {
   ssl_certificate_key       $certDirectory/privkey.pem;
 
   location / {
-    proxy_read_timeout      90;
+    proxy_read_timeout      30;
     proxy_http_version      1.1;
     proxy_set_header        Upgrade \$http_upgrade;
     proxy_set_header        Connection "Upgrade";

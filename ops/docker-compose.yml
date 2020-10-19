@@ -37,3 +37,9 @@ services:
     environment:
       NODE_ENV: development
       REDIS_URL: redis://redis:6379/0
+
+  node1:
+    image: ${WALLET_IMAGE}
+    environment:
+      NODE_ENV: development
+      REDIS_URL: redis://redis:6379/0
