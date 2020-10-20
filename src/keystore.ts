@@ -17,11 +17,16 @@ export const getSub = (topic: string) =>
       subscriber.topic === topic && subscriber.socket.readyState === 1
   )
 
-export const setPub = (socketMessage: ISocketMessage) =>
+export const setPub = (socketMessage: ISocketMessage) => {
   redisClient.lpushAsync(
     `socketMessage:${socketMessage.topic}`,
     JSON.stringify(socketMessage)
+  ).then(() => redisClient.expireAsync(
+      `socketMessage:${socketMessage.topic}`,
+      config.redis.expire
+    )
   )
+}
 
 export const getPub = (topic: string): ISocketMessage[] => {
   return redisClient
