@@ -155,27 +155,19 @@ server {
   ssl_certificate_key       $certDirectory/privkey.pem;
 
   location / {
-    proxy_read_timeout      30;
+    proxy_read_timeout      1800;
+    proxy_send_timeout      1800;
+    keepalive_timeout       1800;
+    add_header "Access-Control-Allow-Origin"  *;
+    proxy_set_header        Host \$host;
+    proxy_set_header        http_x_forwarded_for  \$remote_addr;
+    proxy_pass              http://app;
+
+    # Websocket must have configs
     proxy_http_version      1.1;
     proxy_set_header        Upgrade \$http_upgrade;
     proxy_set_header        Connection "Upgrade";
-    proxy_set_header        Host \$host;
-    proxy_set_header        http_x_forwarded_for  \$remote_addr;
-    set \$upstream bridge;
-    proxy_pass              http://app;
   
-   # Simple requests
-    if (\$request_method ~* "(GET|POST)") {
-        add_header "Access-Control-Allow-Origin"  *;
-    }
-
-    # Preflighted requests
-    if (\$request_method = OPTIONS ) {
-        add_header "Access-Control-Allow-Origin"  *;
-        add_header "Access-Control-Allow-Methods" "GET, POST, OPTIONS, HEAD";
-        add_header "Access-Control-Allow-Headers" "Authorization, Origin, X-Requested-With, Content-Type, Accept";
-        return 200;
-    }
   }
 }
 EOF

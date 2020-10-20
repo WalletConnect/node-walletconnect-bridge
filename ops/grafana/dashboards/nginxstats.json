@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 2,
   "links": [],
   "panels": [
     {
@@ -81,13 +81,6 @@
           "refId": "D"
         },
         {
-          "expr": "rate(nginx_connections_accepted[5m])",
-          "hide": true,
-          "interval": "",
-          "legendFormat": "nginx connections accepted",
-          "refId": "A"
-        },
-        {
           "expr": "rate(nginx_connections_active[5m])",
           "hide": false,
           "interval": "",
@@ -105,7 +98,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Connections Accepted/5m + Connections Active/5m",
+      "title": "Waiting Connection vs Container Start Actions",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -232,7 +225,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Connections Accepted/5m + Connections Active/5m",
+      "title": "Nginx Connections /5M",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -375,7 +368,7 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {
@@ -394,5 +387,5 @@
   "timezone": "",
   "title": "Nginx Dashboard",
   "uid": "asdkj3Adc",
-  "version": 31
+  "version": 4
 }
