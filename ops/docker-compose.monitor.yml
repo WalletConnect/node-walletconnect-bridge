@@ -17,18 +17,65 @@ services:
     volumes:
       - ./nginx/exporter.conf:/etc/nginx/servers/exporter.conf
 
-  exporter:
+  cadvisor:
+    image: gcr.io/google-containers/cadvisor:latest
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+
+  node_exporter:
+     image: quay.io/prometheus/node-exporter
+     volumes:
+       - /:/host:ro,rslave
+     command:
+       # https://github.com/prometheus/node_exporter#collectors
+       - '--path.rootfs=/host'
+       - '--no-collector.arp'
+       - '--no-collector.bcache'
+       - '--no-collector.bonding'
+       - '--no-collector.conntrack'
+       - '--collector.cpu'
+       - '--collector.cpufreq'
+       - '--collector.diskstats'
+       - '--no-collector.edac'
+       - '--no-collector.entropy'
+       - '--no-collector.filefd'
+       - '--collector.filesystem'
+       - '--collector.hwmon'
+       - '--no-collector.infiniband'
+       - '--collector.ipvs'
+       - '--collector.loadavg'
+       - '--no-collector.mdadm'
+       - '--collector.meminfo'
+       - '--no-collector.netclass'
+       - '--no-collector.netdev'
+       - '--collector.netstat'
+       - '--no-collector.nfs'
+       - '--no-collector.nfsd'
+       - '--no-collector.pressure'
+       - '--no-collector.rapl'
+       - '--no-collector.schedstat'
+       - '--no-collector.sockstat'
+       - '--no-collector.softnet'
+       - '--collector.stat'
+       - '--no-collector.textfile'
+       - '--no-collector.thermal_zone'
+       - '--no-collector.time'
+       - '--no-collector.timex'
+       - '--no-collector.udp_queues'
+       - '--no-collector.uname'
+       - '--collector.vmstat'
+       - '--no-collector.xfs'
+       - '--no-collector.zfs'
+
+  nginx_exporter:
     image: nginx/nginx-prometheus-exporter
     command:
       - -nginx.scrape-uri
       - http://nginx:8080/stub_status
-
-  node_exporter:
-    image: quay.io/prometheus/node-exporter 
-    volumes:
-      - /:/host:ro,rslave
-    command:
-      - '--path.rootfs=/host'
 
   prometheus:
     image: quay.io/prometheus/prometheus
