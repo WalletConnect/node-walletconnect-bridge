@@ -26,6 +26,11 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
 
+  redis_exporter:
+    image: oliver006/redis_exporter
+    command:
+      - '--redis.addr=redis://redis:6379'
+
   node_exporter:
      image: quay.io/prometheus/node-exporter
      volumes:
@@ -76,6 +81,8 @@ services:
     command:
       - -nginx.scrape-uri
       - http://nginx:8080/stub_status
+    ports:
+      - "127.0.0.1:9090:9090"
 
   prometheus:
     image: quay.io/prometheus/prometheus
