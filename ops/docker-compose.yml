@@ -32,14 +32,14 @@ services:
   # purpose of Docker swarm and docker load balancing
   # so we are instead handling the load balancing with
   # our own nginx container
-  node0:
-    image: ${WALLET_IMAGE}
+  bridge0:
+    image: ${BRIDGE_IMAGE}
     environment:
       NODE_ENV: development
       REDIS_URL: redis://redis:6379/0
 
-  node1:
-    image: ${WALLET_IMAGE}
+  bridge1:
+    image: ${BRIDGE_IMAGE}
     environment:
       NODE_ENV: development
       REDIS_URL: redis://redis:6379/0

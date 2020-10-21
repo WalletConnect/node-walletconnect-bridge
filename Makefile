@@ -91,7 +91,7 @@ build: pull build-node build-nginx
 	@echo
 
 dev: pull build
-	WALLET_IMAGE=$(walletConnectImage) \
+	BRIDGE_IMAGE=$(walletConnectImage) \
 	NGINX_IMAGE=$(nginxImage) \
 	docker stack deploy \
 	-c ops/docker-compose.yml \
@@ -101,7 +101,7 @@ dev: pull build
 	@echo
 
 dev-monitoring: pull build
-	WALLET_IMAGE=$(walletConnectImage) \
+	BRIDGE_IMAGE=$(walletConnectImage) \
 	NGINX_IMAGE=$(nginxImage) \
 	docker stack deploy \
 	-c ops/docker-compose.yml \
@@ -123,7 +123,7 @@ cloudflare: setup
 	@echo
 
 deploy: setup build cloudflare
-	WALLET_IMAGE=$(walletConnectImage) \
+	BRIDGE_IMAGE=$(walletConnectImage) \
 	NGINX_IMAGE=$(nginxImage) \
 	PROJECT=$(project) \
 	bash ops/deploy.sh
@@ -131,7 +131,7 @@ deploy: setup build cloudflare
 	@echo
 
 deploy-monitoring: setup build cloudflare
-	WALLET_IMAGE=$(walletConnectImage) \
+	BRIDGE_IMAGE=$(walletConnectImage) \
 	NGINX_IMAGE=$(nginxImage) \
 	PROJECT=$(project) \
 	MONITORING=true \
@@ -157,7 +157,8 @@ upgrade: setup
 	@echo
 	git fetch origin $(BRANCH)
 	git merge origin/$(BRANCH)
-	docker service update --force $(project)_node0
+	docker service update --force $(project)_bridge0
+	docker service update --force $(project)_bridge1
 	docker service update --force $(project)_nginx
 	docker service update --force $(project)_redis
 

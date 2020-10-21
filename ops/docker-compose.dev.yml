@@ -4,13 +4,13 @@ services:
   redis:
     ports:
       - "127.0.0.1:6379:6379"
-  node0:
+  bridge0:
     ports:
       - "127.0.0.1:5001:5001"
     volumes:
       - ../build:/root/build
 
-  node1:
+  bridge1:
     ports:
       - "127.0.0.1:5002:5002"
     volumes:
@@ -20,6 +20,6 @@ services:
       CONTAINER_NAME: node
       APP_QTY: 2
     depends_on:
-      - node0
-      - node1
+      - bridge0
+      - bridge1
 

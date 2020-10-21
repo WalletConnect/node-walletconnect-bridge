@@ -6,13 +6,13 @@ services:
       DOMAIN_URL: ${BRIDGE_URL}
       APP_ENV: production
       EMAIL: ${CERTBOT_EMAIL}
-      CONTAINER_NAME: node
+      CONTAINER_NAME: bridge
       APP_PORT: 5000
       APP_QTY: 2
       CLOUDFLARE: ${CLOUDFLARE}
     depends_on:
-      - node0
-      - node1
+      - bridge0
+      - bridge1
 
   # Because of how the bridge application works
   # every client request must go to the same bridge replica
@@ -20,14 +20,14 @@ services:
   # name we can load balance via the docker internal
   # service dns and have the nginx entry container
   # handle the load balancing
-  node0:
-    image: ${WALLET_IMAGE}
+  bridge0:
+    image: ${BRIDGE_IMAGE}
     environment:
       NODE_ENV: production
       REDIS_URL: redis://redis:6379/0
 
-  node1:
-    image: ${WALLET_IMAGE}
+  bridge1:
+    image: ${BRIDGE_IMAGE}
     environment:
       NODE_ENV: production
       REDIS_URL: redis://redis:6379/0
