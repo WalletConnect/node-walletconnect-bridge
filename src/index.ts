@@ -57,7 +57,7 @@ app.post('/subscribe', async (req, res) => {
   })
 })
 
-const wsServer = new WebSocket.Server({ server: app.server })
+const wsServer = new WebSocket.Server({ server: app.server, perMessageDeflate: false })
 
 app.ready(() => {
   wsServer.on('connection', (socket: IWebSocket) => {

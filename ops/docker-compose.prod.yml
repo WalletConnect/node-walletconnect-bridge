@@ -25,9 +25,17 @@ services:
     environment:
       NODE_ENV: production
       REDIS_URL: redis://redis:6379/0
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   bridge1:
     image: ${BRIDGE_IMAGE}
     environment:
       NODE_ENV: production
       REDIS_URL: redis://redis:6379/0
+    deploy:
+      resources:
+        limits:
+          memory: 1G

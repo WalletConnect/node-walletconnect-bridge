@@ -56,7 +56,7 @@ services:
        - '--no-collector.mdadm'
        - '--collector.meminfo'
        - '--no-collector.netclass'
-       - '--no-collector.netdev'
+       - '--collector.netdev'
        - '--collector.netstat'
        - '--no-collector.nfs'
        - '--no-collector.nfsd'
