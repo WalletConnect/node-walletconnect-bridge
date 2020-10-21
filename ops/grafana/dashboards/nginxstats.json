@@ -15,11 +15,15 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 2,
   "links": [],
   "panels": [
     {
-      "aliasColors": {},
+      "aliasColors": {
+        "container start": "dark-red",
+        "nginx connections active": "dark-green",
+        "nginx connections waiting": "semi-dark-blue"
+      },
       "bars": false,
       "dashLength": 10,
       "dashes": false,
@@ -30,21 +34,23 @@
         },
         "overrides": []
       },
-      "fill": 1,
+      "fill": 5,
       "fillGradient": 0,
       "gridPos": {
         "h": 13,
-        "w": 13,
+        "w": 12,
         "x": 0,
         "y": 0
       },
       "hiddenSeries": false,
-      "id": 43,
+      "id": 51,
       "legend": {
+        "alignAsTable": false,
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
+        "rightSide": false,
         "show": true,
         "total": false,
         "values": false
@@ -52,8 +58,11 @@
       "lines": true,
       "linewidth": 1,
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -63,23 +72,33 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(nginx_connections_accepted[1m])",
+          "expr": "rate(engine_daemon_container_actions_seconds_sum{action=\"create\"}[1m])*100000",
+          "format": "time_series",
+          "instant": false,
           "interval": "",
-          "legendFormat": "{{job}}",
-          "refId": "A"
+          "intervalFactor": 1,
+          "legendFormat": "container start",
+          "refId": "D"
         },
         {
-          "expr": "rate(nginx_connections_active[1m])",
+          "expr": "rate(nginx_connections_active[5m])",
+          "hide": false,
           "interval": "",
-          "legendFormat": "{{job}}",
+          "legendFormat": "nginx connections active",
           "refId": "B"
+        },
+        {
+          "expr": "rate(nginx_connections_waiting[5m])",
+          "interval": "",
+          "legendFormat": "nginx connections waiting",
+          "refId": "C"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Connections Accepted/1m + Connections Active/1m",
+      "title": "Waiting Connection vs Container Start Actions",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -95,14 +114,16 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:112",
           "format": "short",
           "label": null,
           "logBase": 1,
           "max": null,
           "min": null,
-          "show": true
+          "show": false
         },
         {
+          "$$hashKey": "object:113",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -128,12 +149,12 @@
         },
         "overrides": []
       },
-      "fill": 1,
+      "fill": 0,
       "fillGradient": 0,
       "gridPos": {
         "h": 13,
-        "w": 11,
-        "x": 13,
+        "w": 12,
+        "x": 12,
         "y": 0
       },
       "hiddenSeries": false,
@@ -148,10 +169,13 @@
         "values": false
       },
       "lines": true,
-      "linewidth": 1,
+      "linewidth": 2,
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -161,15 +185,39 @@
       "steppedLine": false,
       "targets": [
         {
+          "expr": "rate(nginx_connections_writing[5m])",
+          "interval": "",
+          "legendFormat": "writing",
+          "refId": "E"
+        },
+        {
+          "expr": "rate(nginx_connections_waiting[5m])",
+          "interval": "",
+          "legendFormat": "waiting",
+          "refId": "D"
+        },
+        {
+          "expr": "rate(nginx_connections_handled[5m])",
+          "interval": "",
+          "legendFormat": "handled",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(nginx_connections_reading[5m])",
+          "interval": "",
+          "legendFormat": "reading",
+          "refId": "F"
+        },
+        {
           "expr": "rate(nginx_connections_accepted[5m])",
           "interval": "",
-          "legendFormat": "{{job}}",
+          "legendFormat": "accepted",
           "refId": "A"
         },
         {
           "expr": "rate(nginx_connections_active[5m])",
           "interval": "",
-          "legendFormat": "{{job}}",
+          "legendFormat": "active",
           "refId": "B"
         }
       ],
@@ -177,7 +225,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Connections Accepted/5m + Connections Active/5m",
+      "title": "Nginx Connections /5M",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -193,6 +241,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:112",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -201,6 +250,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:113",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -232,98 +282,6 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 13
-      },
-      "hiddenSeries": false,
-      "id": 47,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pluginVersion": "7.1.5",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "rate(engine_daemon_container_actions_seconds_sum[1m])",
-          "interval": "",
-          "legendFormat": "{{action}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Panel Title",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
         "y": 13
       },
       "hiddenSeries": false,
@@ -340,8 +298,11 @@
       "lines": true,
       "linewidth": 1,
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.5",
+      "pluginVersion": "7.2.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -397,109 +358,9 @@
         "align": false,
         "alignLevel": null
       }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "This show better data once you expose docker metrics: https://blog.sebas.tech/blog/docker-prometheus-ufw\n\nYou also need to open port 9323",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 21
-      },
-      "hiddenSeries": false,
-      "id": 29,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "percentage": false,
-      "pluginVersion": "7.1.5",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "process_resident_memory_bytes{job=\"docker_host\"}",
-          "interval": "",
-          "legendFormat": "{{job}}",
-          "refId": "C"
-        },
-        {
-          "expr": "engine_daemon_engine_memory_bytes{job=\"docker_host\"}",
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{job}}",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Memory Usage of Host",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "decbytes",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
     }
   ],
-  "refresh": false,
+  "refresh": "10s",
   "schemaVersion": 26,
   "style": "dark",
   "tags": [],
@@ -507,7 +368,7 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {
@@ -524,7 +385,7 @@
     ]
   },
   "timezone": "",
-  "title": "Sysadmin Dashboard",
+  "title": "Nginx Dashboard",
   "uid": "asdkj3Adc",
-  "version": 13
+  "version": 4
 }
