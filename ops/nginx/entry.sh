@@ -148,13 +148,13 @@ server {
   listen 443 ssl;
   listen [::]:443 ssl;
   server_name $domain;
-  # https://stackoverflow.com/questions/35744650/docker-network-nginx-resolver
-  resolver 127.0.0.11 valid=30s;
  
   ssl_certificate           $certDirectory/fullchain.pem;
   ssl_certificate_key       $certDirectory/privkey.pem;
 
   location / {
+    # https://stackoverflow.com/questions/35744650/docker-network-nginx-resolver
+    resolver 127.0.0.11 valid=30s;
     proxy_read_timeout      1800;
     proxy_send_timeout      1800;
     keepalive_timeout       1800;
@@ -162,6 +162,7 @@ server {
     proxy_set_header        Host \$host;
     proxy_set_header        http_x_forwarded_for  \$remote_addr;
     proxy_pass              http://app;
+
 
     # Websocket must have configs
     proxy_http_version      1.1;
