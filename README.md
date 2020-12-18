@@ -4,7 +4,7 @@ Bridge Server for relaying WalletConnect connections
 
 ## Development 🧪
 
-Local dev work is using local self signed certificates withing the docker environment.
+Local dev work is using local self signed certificates within the docker environment.
 
 Your Walletconnect enabled app needs to be on the same local network.
 
@@ -57,7 +57,7 @@ For this to work you must point grafana.`<bridge domain>` to the same ip as `<br
 
 #### Cloudflare Support
 
-The config step of the Makefile will ask you whether you are using cloudflare as a DNS proxy for your bridge domain. If you answer yes then the certbot will need a Cloudflare api topken that can be obtain from: https://dash.cloudflare.com/profile/api-tokens. The type of token you need is a `Edit zone DNS` with access to the bridge domain.
+The config step of the Makefile will ask you whether you are using cloudflare as a DNS proxy for your bridge domain. If you answer yes then the certbot will need a Cloudflare API token that can be obtained from: https://dash.cloudflare.com/profile/api-tokens. The type of token you need is a `Edit zone DNS` with access to the bridge domain.
 
 The API token will be safeguarded with a `docker secret`.
 
