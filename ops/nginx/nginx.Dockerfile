@@ -4,7 +4,7 @@ RUN apk add --update --no-cache openssl-dev libffi-dev  musl-dev python3-dev py3
   ln -fs /dev/stdout /var/log/nginx/access.log && \
   ln -fs /dev/stdout /var/log/nginx/error.log
 
-RUN pip3 install certbot-dns-cloudflare
+RUN CRYPTOGRAPHY_DONT_BUILD_RUST=1 pip3 install certbot-dns-cloudflare
 
 COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./letsencrypt.conf /etc/nginx/letsencrypt.conf
