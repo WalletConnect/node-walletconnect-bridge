@@ -13,7 +13,7 @@
   "homepage": "https://walletconnect.org",
   "license": "LGPL-3.0",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "bluebird": "^3.7.2",
     "fastify": "^2.15.3",
     "fastify-helmet": "^3.0.2",
